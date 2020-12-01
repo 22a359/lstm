@@ -16,10 +16,18 @@ void Network::init(eRole role, int port)
     inet_aton(ipAddr, &(this->addrSer.sin_addr));
     this->addrSer.sin_family = AF_INET;
     this->addrSer.sin_port = htons(port);
+    int opt = SO_REUSEADDR;
+    setsockopt(this->sockSer, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    // 接收缓冲区
+    int nRecvBuf = 256 * 1024; //设置为256K
+    setsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (const char *)&nRecvBuf, sizeof(int));
+    // 发送缓冲区
+    int nSendBuf = 256 * 1024; //设置为256K
+    setsockopt(this->sockSer, SOL_SOCKET, SO_SNDBUF, (const char *)&nSendBuf, sizeof(int));
+    getsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (char *)&nRecvBuf, (socklen_t *)sizeof(int));
+    cout << "nRecvBuf:" << nRecvBuf << endl;
     if (this->role == SERVER)
     {
-        int opt = SO_REUSEADDR;
-        setsockopt(this->sockSer, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
         //绑定
         if (bind(sockSer, (struct sockaddr *)(&this->addrSer), sizeof(struct sockaddr)) == -1)
         {
@@ -64,21 +72,24 @@ bool Network::mSend(int fd, string send_string)
     string send_size_string = to_string(send_size);
     char *c_send_size_str = new char[send_size_string.size() + 1];
     strcpy(c_send_size_str, send_size_string.c_str());
-    if (write(fd, c_send_size_str, send_size_string.size() + 1) == -1)
+    if (send(fd, c_send_size_str, send_size_string.size() + 1, 0) == -1)
     { //告知对方需要准备的缓冲区大小
         printf("Prewrite error : %s\n", strerror(errno));
         exit(1);
     }
-    if (read(fd, this->checkBuf, BUF_SIZE) == -1 && !(strcmp(this->checkBuf, this->checkMSG)))
+    if (recv(fd, this->checkBuf, BUF_SIZE, 0) == -1 && !(strcmp(this->checkBuf, c_send_size_str)))
     { //接收确认信息
         printf("Check error : %s\n", strerror(errno));
         exit(1);
     }
-    if (write(fd, cstr, send_size) == -1)
+    ssize_t send_num;
+    if ((send_num = send(fd, cstr, send_size, 0)) == -1)
     { //发送数据
         printf("Write error : %s\n", strerror(errno));
         exit(1);
     }
+    cout << "send num is: " << send_size << " and sended: " << send_num << endl;
+    // cout << "send:\n" << cstr << endl;
     delete[] cstr;
     delete[] c_send_size_str;
     return true;
@@ -86,23 +97,37 @@ bool Network::mSend(int fd, string send_string)
 //接收一个char指针
 char *Network::mReceive(int fd)
 {
-    if (read(fd, this->recvSizeBuf, BUF_SIZE) == -1)
+    if (recv(fd, this->recvSizeBuf, BUF_SIZE, 0) == -1)
     { //接收缓冲区尺寸
-        printf("Prewrite error : %s\n", strerror(errno));
+        printf("Preread error : %s\n", strerror(errno));
         exit(1);
     }
-    if (write(fd, this->checkMSG, 3) == -1)
+    if (send(fd, this->recvSizeBuf, BUF_SIZE, 0) == -1)
     { //发送确认信息
         printf("Check error : %s\n", strerror(errno));
         exit(1);
     }
-    size_t recv_size = atoi(this->recvSizeBuf); //接收缓冲区尺寸
+    size_t recv_size = atol(this->recvSizeBuf); //接收缓冲区尺寸
     char *cstr = new char[recv_size];           //接收缓冲区
-    if (read(fd, cstr, recv_size) == -1)
-    { //接收数据
-        printf("Check error : %s\n", strerror(errno));
-        exit(1);
+    string recv_temp;
+    ssize_t recv_num, remain_num = recv_size;
+    int flag = 0;
+    while (remain_num > 0)
+    {
+        if ((recv_num = recv(fd, cstr, recv_size, 0)) == -1 || recv_num == 0)
+        { //接收数据
+            printf("Read error : %s\n", strerror(errno));
+            exit(1);
+        }
+        remain_num -= recv_num;
+        recv_temp += cstr;
+        if (remain_num > 0)
+            flag++;
+        cout << "recv num is: " << recv_num << " size is: " << recv_size << " and remain is: " << remain_num << endl;
     }
+    if (flag)
+        strcpy(cstr, recv_temp.c_str());
+    // cout << "recv:\n" << cstr << endl;
     return cstr;
 }
 //发送两个mpz_class数
@@ -173,36 +198,56 @@ bool Network::mReceive(Matrix &matrix1, Matrix &matrix2)
 
     char *pch;
     int counts = 0, row, col;
-    int matrix_row = atoi(pch = strtok(recv1, this->mDelim));
-    int matrix_col = atoi(pch = strtok(NULL, this->mDelim));
+    pch = strtok(recv1, this->mDelim);
+    if (pch == NULL)
+    {
+        printf("Reveice matrix error!(1) : %s\n", strerror(errno));
+        exit(1);
+    }
+    int matrix_row = atoi(pch);
+    pch = strtok(NULL, this->mDelim);
+    if (pch == NULL)
+    {
+        printf("Reveice matrix error!(2) : %s\n", strerror(errno));
+        exit(1);
+    }
+    int matrix_col = atoi(pch);
 
     Matrix matrix_one(M_NORMAL, 0, matrix_row, matrix_col);
-    while (pch != NULL)
+    for (int i = 0; i < matrix_row; i++)
     {
-        row = counts / (matrix_col);
-        col = counts % (matrix_col);
-        pch = strtok(NULL, this->mDelim);
-        if (pch == NULL)
-            break;
-        long temp = atol(pch);
-        matrix_one.change<long>(row, col, temp);
-        counts++;
+        for (int j = 0; j < matrix_col; j++)
+        {
+            pch = strtok(NULL, this->mDelim);
+            long temp = atol(pch);
+            matrix_one.change(i, j, temp);
+        }
     }
 
     counts = 0;
-    matrix_row = atoi(pch = strtok(recv2, this->mDelim));
-    matrix_col = atoi(pch = strtok(NULL, this->mDelim));
-    Matrix matrix_two(M_NORMAL, 0, matrix_row, matrix_col);
-    while (pch != NULL)
+    pch = strtok(recv2, this->mDelim);
+    if (pch == NULL)
     {
-        row = counts / (matrix_col);
-        col = counts % (matrix_col);
-        pch = strtok(NULL, this->mDelim);
-        if (pch == NULL)
-            break;
-        long temp = atol(pch);
-        matrix_two.change<long>(row, col, temp);
-        counts++;
+        printf("Reveice matrix error!(3) : %s\n", strerror(errno));
+        exit(1);
+    }
+    matrix_row = atoi(pch);
+    pch = strtok(NULL, this->mDelim);
+    if (pch == NULL)
+    {
+        printf("Reveice matrix error!(4) : %s\n", strerror(errno));
+        exit(1);
+    }
+    matrix_col = atoi(pch);
+    Matrix matrix_two(M_NORMAL, 0, matrix_row, matrix_col);
+    for (int i = 0; i < matrix_row; i++)
+    {
+        for (int j = 0; j < matrix_col; j++)
+        {
+            pch = strtok(NULL, this->mDelim);
+            long temp = atol(pch);
+            matrix_two.change(i, j, temp);
+        }
     }
 
     this->networkTools.mCopy(matrix_one, matrix1);
@@ -210,7 +255,7 @@ bool Network::mReceive(Matrix &matrix1, Matrix &matrix2)
     delete[] cstr;
     return true;
 }
-//接收两个矩阵数组
+//发送两个矩阵数组
 bool Network::mSend(array<Matrix, 5> array1, array<Matrix, 5> array2)
 {
     int fd = (this->role == SERVER) ? this->sockCli : sockSer;
@@ -261,29 +306,74 @@ bool Network::mReceive(array<Matrix, 5> &array1, array<Matrix, 5> &array2)
     for (int k = 0; k < 2; k++)
     {
         char *matrix1 = strtok(arrays[k], this->aDelim);
+        if (matrix1 == NULL)
+        {
+            printf("Reveice matrix array error!(-1) : %s\n", strerror(errno));
+            exit(1);
+        }
         char *matrix2 = strtok(NULL, this->aDelim);
+        if (matrix2 == NULL)
+        {
+            printf("Reveice matrix array error!(-2) : %s\n", strerror(errno));
+            exit(1);
+        }
         char *matrix3 = strtok(NULL, this->aDelim);
+        if (matrix3 == NULL)
+        {
+            printf("Reveice matrix array error!(-3) : %s\n", strerror(errno));
+            exit(1);
+        }
         char *matrix4 = strtok(NULL, this->aDelim);
+        if (matrix4 == NULL)
+        {
+            printf("Reveice matrix array error!(-4) : %s\n", strerror(errno));
+            exit(1);
+        }
         char *matrix5 = strtok(NULL, this->aDelim);
+        if (matrix5 == NULL)
+        {
+            printf("Reveice matrix array error!(-5) : %s\n", strerror(errno));
+            exit(1);
+        }
         char *matrixs[5] = {matrix1, matrix2, matrix3, matrix4, matrix5};
         for (int t = 0; t < 5; t++)
         {
             char *pch;
-            int counts = 0, row, col;
-            int matrix_row = atoi(pch = strtok(matrixs[t], this->mDelim));
-            int matrix_col = atoi(pch = strtok(NULL, this->mDelim));
-
-            Matrix matrix(M_NORMAL, 0, matrix_row, matrix_col);
-            while (pch != NULL)
+            int counts = 0, row = 0, col = 0;
+            pch = strtok(matrixs[t], this->mDelim);
+            if (pch == NULL)
             {
-                row = counts / (matrix_col);
-                col = counts % (matrix_col);
-                pch = strtok(NULL, this->mDelim);
-                if (pch == NULL)
-                    break;
-                long temp = atol(pch);
-                matrix.change<long>(row, col, temp);
-                counts++;
+                printf("Reveice matrix array error!(1) : %s\n", strerror(errno));
+                exit(1);
+            }
+            int matrix_row = atoi(pch);
+            pch = strtok(NULL, this->mDelim);
+            if (pch == NULL)
+            {
+                printf("Reveice matrix array error!(2) : %s\n", strerror(errno));
+                exit(1);
+            }
+            int matrix_col = atoi(pch);
+
+            if (matrix_row <= 0 || matrix_col <= 0)
+            {
+                printf("Parsing error!");
+                exit(1);
+            }
+            Matrix matrix(M_NORMAL, 0, matrix_row, matrix_col);
+            for (int i = 0; i < matrix_row; i++)
+            {
+                for (int j = 0; j < matrix_col; j++)
+                {
+                    pch = strtok(NULL, this->mDelim);
+                    if (pch == NULL)
+                    {
+                        cout << "Exchange error!" << endl;
+                        exit(1);
+                    }
+                    long temp = atol(pch);
+                    matrix.change(i, j, temp);
+                }
             }
             this->networkTools.mCopy(matrix, mArrays[k][t]);
             // mArrays[k][t] = matrix;

@@ -52,7 +52,7 @@ private:
     void createIntTriple();
     void creat(int m, int d, int n, int counts);
     array<array<array<int, 58>, 58>, 58> table;
-    int m1m1m1_counts = 100;
+    int m1m1m1_counts = 10000;
     int m40m58m1_counts = 100;
     int m40m40m1_counts = 100;
     int m20m40m1_counts = 100;

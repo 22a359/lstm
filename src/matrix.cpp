@@ -1,5 +1,7 @@
 #include "matrix.h"
 using namespace std;
+mpz_class modNum;
+mpz_class eAndC = 4294967296;
 
 Matrix::Matrix()
 {
@@ -21,11 +23,14 @@ Matrix::Matrix(int row, int col)
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
         {
-            mpz_t z;
+            mpz_t z, r;
             mpz_init(z);
+            mpz_init(r);
             mpz_urandomb(z, grt, randBit);
-            this->matrix[i][j] = mpz_class(mpz_fdiv_ui(z, modNums));
+            mpz_mod(r, z, modNum.get_mpz_t());
+            this->matrix[i][j] = mpz_class(r);
             mpz_clear(z);
+            mpz_clear(r);
         }
         gmp_randclear(grt);
     }
@@ -56,10 +61,11 @@ Matrix::Matrix(bool flag, int row, int col)
     }
 }
 //生成满矩阵或对角矩阵
-Matrix::Matrix(bool flag, int num, int row, int col)
+Matrix::Matrix(bool flag, mpz_class num, int row, int col)
 {
     this->row = row;
     this->col = col;
+    mpz_class zero = 0;
     this->matrix.resize(this->row);
     for (int i = 0; i < this->row; i++)
     {
@@ -73,7 +79,7 @@ Matrix::Matrix(bool flag, int num, int row, int col)
                 if (j == i)
                     this->matrix[i][j] = mpz_class(num);
                 else
-                    this->matrix[i][j] = mpz_class("0", baseNum);
+                    this->matrix[i][j] = mpz_class(zero);
             }
         }
     }
@@ -110,6 +116,11 @@ Matrix::Matrix(int row, int col, mpz_class *array)
         }
     }
 }
+//将第positionRow行，第positionCol列的数替换为num
+void Matrix::change(int positionRow, int positionCol, mpz_class num)
+{
+    this->matrix[positionRow][positionCol] = mpz_class(num);
+}
 //矩阵输出
 void Matrix::print()
 {
@@ -118,6 +129,18 @@ void Matrix::print()
         for (int j = 0; j < this->col; j++)
         {
             gmp_printf("%Zd	", this->matrix[i][j].get_mpz_t());
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+void Matrix::print(int flag)
+{
+    for (int i = 0; i < this->row; i++)
+    {
+        for (int j = 0; j < this->col; j++)
+        {
+            gmp_printf("(%d-%d) %Zd	", i, j, this->matrix[i][j].get_mpz_t());
         }
         printf("\n");
     }
@@ -278,7 +301,7 @@ void MatrixTools::mLocalMul(Matrix &x, Matrix &y, Matrix &ans)
 }
 //矩阵三元组LSTM乘法
 void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
-{ 
+{
     assert(x.col == y.col && x.row == y.row);
     this->mResize(x.row, x.col, ans);
     for (int i = 0; i < ans.row; i++)
@@ -337,7 +360,7 @@ void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
 void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_class a;
-    mpz_class p(modNum, baseNum);
+    mpz_class p(modNumStr, baseNum);
     a = x + y + p;
     z = a % p;
 }
@@ -350,7 +373,7 @@ void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
 void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_class a;
-    mpz_class p(modNum, baseNum);
+    mpz_class p(modNumStr, baseNum);
     a = x - y + p;
     z = a % p;
 }
@@ -358,7 +381,7 @@ void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_class a;
-    mpz_class p(modNum, baseNum);
+    mpz_class p(modNumStr, baseNum);
     a = x * y + p;
     z = a % p;
 }

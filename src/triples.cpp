@@ -20,26 +20,26 @@ void Triples::init(eRole role)
     table[40][20][1] = this->m40m20m1;
     table[40][1][40] = this->m40m1m40;
     table[40][1][58] = this->m40m1m58;
-    creat(1, 1, 1, this->m1m1m1_counts);
+    // creat(1, 1, 1, this->m1m1m1_counts);
     creat(40, 58, 1, this->m40m58m1_counts);
-    creat(40, 40, 1, this->m40m40m1_counts);
-    creat(20, 40, 1, this->m20m40m1_counts);
-    creat(1, 20, 1, this->m1m20m1_counts);
-    creat(1, 1, 20, this->m1m1m20_counts);
-    creat(20, 20, 1, this->m20m20m1_counts);
-    creat(20, 1, 1, this->m20m1m1_counts);
-    creat(20, 1, 40, this->m20m1m40_counts);
-    creat(40, 40, 20, this->m40m40m20_counts);
-    creat(40, 20, 1, this->m40m20m1_counts);
-    creat(40, 1, 40, this->m40m1m40_counts);
-    creat(40, 1, 58, this->m40m1m58_counts);
+    // creat(40, 40, 1, this->m40m40m1_counts);
+    // creat(20, 40, 1, this->m20m40m1_counts);
+    // creat(1, 20, 1, this->m1m20m1_counts);
+    // creat(1, 1, 20, this->m1m1m20_counts);
+    // creat(20, 20, 1, this->m20m20m1_counts);
+    // creat(20, 1, 1, this->m20m1m1_counts);
+    // creat(20, 1, 40, this->m20m1m40_counts);
+    // creat(40, 40, 20, this->m40m40m20_counts);
+    // creat(40, 20, 1, this->m40m20m1_counts);
+    // creat(40, 1, 40, this->m40m1m40_counts);
+    // creat(40, 1, 58, this->m40m1m58_counts);
 }
 
 void Triples::creat(int m, int d, int n, int counts)
 {
-    if (m == d == n == 1)
+    if (m == 1 && d == 1 && n == 1)
     {
-        cout << "Generate 1×1 triples" << endl;
+        cout << "\nGenerate 1×1 triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createIntTriple();
@@ -48,7 +48,7 @@ void Triples::creat(int m, int d, int n, int counts)
     }
     else
     {
-        cout << "Generate " << m << "×" << d << "×" << n << " triples" << endl;
+        cout << "\nGenerate " << m << "×" << d << "×" << n << " triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createMatrixTriple(m, d, n);
@@ -62,9 +62,9 @@ void Triples::createIntTriple()
     random_device rd;
     default_random_engine e(rd());
     mpz_class a, b, c, aTimesB;
-    a = e() % modNums;
-    b = e() % modNums;
-    c = e() % modNums;
+    a = e() % modNum;
+    b = e() % modNum;
+    c = e() % modNum;
     this->tripleTools.mLocalMocheng(a, b, aTimesB);
     if (this->role == SERVER)
     {
@@ -85,8 +85,8 @@ void Triples::createIntTriple()
     else
     {
         Matrix Z, W;
-        mpz_class r = e() % modNums;
-        mpz_class u, v, r_inv, temp, mod = modNums;
+        mpz_class r = e() % modNum;
+        mpz_class u, v, r_inv, temp, mod = modNum;
         mpz_class array[5] = {1, b, a, aTimesB, -1};
         Matrix Y(1, 5, array);
         Matrix R(1, 5);
@@ -106,13 +106,16 @@ void Triples::createMatrixTriple(int m, int d, int n)
 {
     random_device rd;
     default_random_engine e(rd());
-    mpz_class r = e() % modNums, mod = modNums, r_inv;
+    mpz_class r = e() % modNum, mod = modNum, r_inv;
     Matrix A{m, d}, B{d, n}, C{m, n}, aTimesB;
     Matrix I{M_NORMAL, 1, n, n}, I_minus{M_NORMAL, -1, n, n};
     this->tripleTools.mLocalMul(A, B, aTimesB);
     if (this->role == SERVER)
     {
-        array<Matrix, 5> R, W;
+        Matrix R1, R2, R3, R4, R5;
+        Matrix W1, W2, W3, W4, W5;
+        array<Matrix, 5> R = {R1, R2, R3, R4, R5};
+        array<Matrix, 5> W = {W1, W2, W3, W4, W5};
         array<Matrix, 5> X = {aTimesB, A, B, I, C};
         Matrix U{M_NORMAL, 0, m, n}, V{M_NORMAL, 0, m, n}, temp_U, temp_V;
         this->network.mReceive(R, W);
@@ -137,6 +140,7 @@ void Triples::createMatrixTriple(int m, int d, int n)
         this->tripleTools.mAccu(V, temp_V);
         this->tripleTools.mLocalMul(X[4], W[4], temp_V);
         this->tripleTools.mAccu(V, temp_V);
+
         this->network.mSend(U, V);
     }
     else
@@ -153,7 +157,7 @@ void Triples::createMatrixTriple(int m, int d, int n)
             this->tripleTools.mConstMul(W[i], temp, r.get_mpz_t());
             this->tripleTools.mCopy(temp, W[i]);
         }
-        this->network.mSend(R, W); //此处有BUG
+        this->network.mSend(R, W);
         this->network.mReceive(U, V);
         mpz_invert(r_inv.get_mpz_t(), r.get_mpz_t(), mod.get_mpz_t());
         this->tripleTools.mConstMul(V, temp, r_inv.get_mpz_t());

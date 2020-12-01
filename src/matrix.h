@@ -22,11 +22,13 @@ using namespace std;
 #define M_DIAGONAL false
 #define M_GAUSS true
 const int baseNum = 10;
-const string modNum = "40343";
-const unsigned long modNums = 40343;
-// const string modNum = "9223372036854775907";
-// const unsigned long modNums = 9223372036854775907;
-const unsigned long eAndC = 10000;
+const string modNumStr = "618970019642690137449562111";
+extern mpz_class modNum;
+extern mpz_class eAndC;
+// const string modNumStr = "40343";
+// const string modNumStr = "9223372036854775907";
+// const unsigned long modNum = 9223372036854775907;
+// const unsigned long eAndC = 10000;
 const mp_bitcnt_t randBit = 256;
 
 class Matrix
@@ -40,10 +42,10 @@ public:
     Matrix(int row, int col, int *array);
     Matrix(int row, int col, mpz_class *array);
     Matrix(bool flag, int row, int col);
-    Matrix(bool flag, int num, int row, int col);
+    Matrix(bool flag, mpz_class num, int row, int col);
     void print(); //矩阵输出
-    template <typename T = int>
-    void change(int positionRow, int positionCol, T num);
+    void print(int flag);
+    void change(int positionRow, int positionCol, mpz_class num);
 
 private:
     void CreateMatrix(int row, int col);          //创建随机矩阵
@@ -75,12 +77,4 @@ public:
     void mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z);
     void mResize(int row, int col, Matrix &y);
 };
-
-//将第positionRow行，第positionCol列的数替换为num
-template <typename T>
-void Matrix::change(int positionRow, int positionCol, T num)
-{
-    this->matrix[positionRow][positionCol] = mpz_class(num);
-}
-
 #endif

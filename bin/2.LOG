@@ -1,0 +1,18 @@
+nRecvBuf:262144
+nRecvBuf:262144
+
+Generate 40×58×1 triples
+send num is: 134691 and sended: 134691
+recv num is: 2230 size is: 2230 and remain is: 0
+No.0	Generated
+send num is: 134730 and sended: 134730
+recv num is: 2236 size is: 2236 and remain is: 0
+No.1	Generated
+send num is: 134710 and sended: 134710
+recv num is: 2240 size is: 2240 and remain is: 0
+No.2	Generated
+send num is: 134650 and sended: 134650
+recv num is: 2240 size is: 2240 and remain is: 0
+No.3	Generated
+send num is: 134696 and sended: 134696
+Read error : Numerical result out of range

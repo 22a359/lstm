@@ -1,0 +1,18 @@
+nRecvBuf:262144
+nRecvBuf:262144
+
+Generate 40×58×1 triples
+recv num is: 134691 size is: 134691 and remain is: 0
+send num is: 2230 and sended: 2230
+No.0	Generated
+recv num is: 134730 size is: 134730 and remain is: 0
+send num is: 2236 and sended: 2236
+No.1	Generated
+recv num is: 134710 size is: 134710 and remain is: 0
+send num is: 2240 and sended: 2240
+No.2	Generated
+recv num is: 134650 size is: 134650 and remain is: 0
+send num is: 2240 and sended: 2240
+No.3	Generated
+recv num is: 65483 size is: 134696 and remain is: 69213
+recv num is: 69213 size is: 134696 and remain is: 0

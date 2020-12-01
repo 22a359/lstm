@@ -57,7 +57,7 @@ void TriplesMul::mPoww(Matrix &x, Matrix &ans)
 void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_class temp, mod, Ex, Ey, E, Fx, Fy, F;
-    mod = modNums;
+    mod = modNum;
     temp = 0;
     IntTriples triad = triads.getTriples();
     this->mulgateTools.mojian(x, triad.a, Ex);
