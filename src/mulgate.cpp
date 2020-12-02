@@ -1,4 +1,4 @@
-#include"mulgate.h"
+#include "mulgate.h"
 using namespace std;
 void TriplesMul::init(eRole role)
 {
@@ -10,13 +10,18 @@ void TriplesMul::init(eRole role)
 void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
 { //得多次调用对应尺寸的矩阵乘法三元组
     assert(x.col == y.row);
+    string ck_string = this->network.checkMSG, recv_string;
     this->mulgateTools.mResize(x.row, y.col, ans);
     Matrix Ex, Ey, E, Fx, Fy, F, temp;
     MatrixTriples triad = triads.getTriples(x.row, x.col, y.col);
     this->mulgateTools.mSub(x, triad.a, Ex);
     this->mulgateTools.mSub(y, triad.b, Fx);
-    this->network.mSend(Ex, Fx);
-    this->network.mReceive(Ey, Fy);
+    this->network.mSend(Ex);
+    this->network.mReceive(recv_string);
+    this->network.mSend(Fx);
+    this->network.mReceive(Ey);
+    this->network.mSend(ck_string);
+    this->network.mReceive(Fy);
     this->mulgateTools.mAdd(Ex, Ey, E);
     this->mulgateTools.mAdd(Fx, Fy, F);
     if (role == SERVER)
@@ -57,13 +62,18 @@ void TriplesMul::mPoww(Matrix &x, Matrix &ans)
 void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_class temp, mod, Ex, Ey, E, Fx, Fy, F;
+    string ck_string = this->network.checkMSG, recv_string;
     mod = modNum;
     temp = 0;
     IntTriples triad = triads.getTriples();
     this->mulgateTools.mojian(x, triad.a, Ex);
     this->mulgateTools.mojian(y, triad.b, Ey);
-    this->network.mSend(Ex, Fx);
-    this->network.mReceive(Ey, Fy);
+    this->network.mSend(Ex);
+    this->network.mReceive(recv_string);
+    this->network.mSend(Fx);
+    this->network.mReceive(Ey);
+    this->network.mSend(ck_string);
+    this->network.mReceive(Fy);
     this->mulgateTools.mojia(Ex, Ey, E);
     this->mulgateTools.mojia(Fx, Fy, F);
     if (role == SERVER)

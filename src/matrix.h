@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <fstream>
+#include <iomanip>
 #include <gmp.h>
 #include <gmpxx.h>
 using namespace std;
@@ -22,14 +24,10 @@ using namespace std;
 #define M_DIAGONAL false
 #define M_GAUSS true
 const int baseNum = 10;
-const string modNumStr = "618970019642690137449562111";
+extern string modNumStr;
 extern mpz_class modNum;
 extern mpz_class eAndC;
-// const string modNumStr = "40343";
-// const string modNumStr = "9223372036854775907";
-// const unsigned long modNum = 9223372036854775907;
-// const unsigned long eAndC = 10000;
-const mp_bitcnt_t randBit = 256;
+const mp_bitcnt_t randBit = 512;
 
 class Matrix
 {

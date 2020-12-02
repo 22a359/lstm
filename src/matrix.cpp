@@ -2,7 +2,8 @@
 using namespace std;
 mpz_class modNum;
 mpz_class eAndC = 4294967296;
-
+// string modNumStr = "618970019642690137449562111";
+string modNumStr = "40343";
 Matrix::Matrix()
 {
     this->col = this->row = 0;
@@ -333,6 +334,8 @@ void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
 //     this->mMul(xt, y, ans);
 // }
 //矩阵尺寸重设
+
+//矩阵尺寸重设
 void MatrixTools::mResize(int row, int col, Matrix &matrix)
 {
     if (matrix.col != col || matrix.row != row)
@@ -342,6 +345,7 @@ void MatrixTools::mResize(int row, int col, Matrix &matrix)
         matrix.matrix.resize(matrix.row);
         for (int i = 0; i < matrix.row; i++)
         {
+            vector<mpz_class>(matrix.matrix[i]).swap(matrix.matrix[i]);
             matrix.matrix[i].resize(matrix.col);
             for (int j = 0; j < matrix.col; j++)
                 matrix.matrix[i][j] = mpz_class("0", baseNum);
@@ -359,10 +363,14 @@ void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
 //模加
 void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 {
-    mpz_class a;
-    mpz_class p(modNumStr, baseNum);
-    a = x + y + p;
-    z = a % p;
+    mpz_t a, b, r;
+    mpz_init(a);
+    mpz_init(b);
+    mpz_init(r);
+    mpz_add(a, x.get_mpz_t(), y.get_mpz_t());
+    mpz_add(b, a, modNum.get_mpz_t());
+    mpz_mod(r, b, modNum.get_mpz_t());
+    z = mpz_class(r);
 }
 //模累加,x+=y
 void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
@@ -372,16 +380,24 @@ void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
 //模减
 void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 {
-    mpz_class a;
-    mpz_class p(modNumStr, baseNum);
-    a = x - y + p;
-    z = a % p;
+    mpz_t a, b, r;
+    mpz_init(a);
+    mpz_init(b);
+    mpz_init(r);
+    mpz_sub(a, x.get_mpz_t(), y.get_mpz_t());
+    mpz_add(b, a, modNum.get_mpz_t());
+    mpz_mod(r, b, modNum.get_mpz_t());
+    z = mpz_class(r);
 }
 //本地模乘
 void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
-    mpz_class a;
-    mpz_class p(modNumStr, baseNum);
-    a = x * y + p;
-    z = a % p;
+    mpz_t a, b, r;
+    mpz_init(a);
+    mpz_init(b);
+    mpz_init(r);
+    mpz_mul(a, x.get_mpz_t(), y.get_mpz_t());
+    mpz_add(b, a, modNum.get_mpz_t());
+    mpz_mod(r, b, modNum.get_mpz_t());
+    z = mpz_class(r);
 }

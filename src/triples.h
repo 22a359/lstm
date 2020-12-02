@@ -51,8 +51,10 @@ private:
     void createMatrixTriple(int m, int d, int n);
     void createIntTriple();
     void creat(int m, int d, int n, int counts);
+    mpz_class randNum();//在大素数范围内生成随机数
+    string randIndex();//生成随机序列号
     array<array<array<int, 58>, 58>, 58> table;
-    int m1m1m1_counts = 10000;
+    int m1m1m1_counts = 100;
     int m40m58m1_counts = 100;
     int m40m40m1_counts = 100;
     int m20m40m1_counts = 100;

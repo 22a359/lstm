@@ -19,13 +19,11 @@ void Network::init(eRole role, int port)
     int opt = SO_REUSEADDR;
     setsockopt(this->sockSer, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     // 接收缓冲区
-    int nRecvBuf = 256 * 1024; //设置为256K
+    int nRecvBuf = 64 * 1024; //设置为64K
     setsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (const char *)&nRecvBuf, sizeof(int));
     // 发送缓冲区
-    int nSendBuf = 256 * 1024; //设置为256K
+    int nSendBuf = 64 * 1024; //设置为64K
     setsockopt(this->sockSer, SOL_SOCKET, SO_SNDBUF, (const char *)&nSendBuf, sizeof(int));
-    getsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (char *)&nRecvBuf, (socklen_t *)sizeof(int));
-    cout << "nRecvBuf:" << nRecvBuf << endl;
     if (this->role == SERVER)
     {
         //绑定
@@ -88,15 +86,16 @@ bool Network::mSend(int fd, string send_string)
         printf("Write error : %s\n", strerror(errno));
         exit(1);
     }
-    cout << "send num is: " << send_size << " and sended: " << send_num << endl;
+    // cout << "send num is: " << send_size << endl;
     // cout << "send:\n" << cstr << endl;
     delete[] cstr;
     delete[] c_send_size_str;
     return true;
 }
-//接收一个char指针
-char *Network::mReceive(int fd)
+//接收一个string
+bool Network::mReceive(int fd, string &recv_string)
 {
+    recv_string.clear();
     if (recv(fd, this->recvSizeBuf, BUF_SIZE, 0) == -1)
     { //接收缓冲区尺寸
         printf("Preread error : %s\n", strerror(errno));
@@ -109,7 +108,7 @@ char *Network::mReceive(int fd)
     }
     size_t recv_size = atol(this->recvSizeBuf); //接收缓冲区尺寸
     char *cstr = new char[recv_size];           //接收缓冲区
-    string recv_temp;
+    memset(cstr, '\0', sizeof(recv_size));
     ssize_t recv_num, remain_num = recv_size;
     int flag = 0;
     while (remain_num > 0)
@@ -120,85 +119,142 @@ char *Network::mReceive(int fd)
             exit(1);
         }
         remain_num -= recv_num;
-        recv_temp += cstr;
-        if (remain_num > 0)
-            flag++;
-        cout << "recv num is: " << recv_num << " size is: " << recv_size << " and remain is: " << remain_num << endl;
+        recv_string += cstr;
     }
-    if (flag)
-        strcpy(cstr, recv_temp.c_str());
-    // cout << "recv:\n" << cstr << endl;
-    return cstr;
-}
-//发送两个mpz_class数
-bool Network::mSend(mpz_class send1, mpz_class send2)
-{
-    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    string send_one = send1.get_str();
-    string send_two = send2.get_str();
-    string send_string = send_one + "|" + send_two;
-    this->mSend(fd, send_string);
-    return true;
-}
-//接收两个mpz_class数
-bool Network::mReceive(mpz_class &receive1, mpz_class &receive2)
-{
-    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    char *cstr = this->mReceive(fd);
-    char *recv1 = strtok(cstr, this->delim);
-    char *recv2 = strtok(NULL, this->delim);
-    receive1 = mpz_class(recv1, baseNum);
-    receive2 = mpz_class(recv2, baseNum);
+    // cout << "recv num is: " << recv_size << " and recved: " << recv_string.size() + 1 << endl;
+    // if (recv_size != recv_string.size() + 1)
+    //     cout << recv_string << endl;
     delete[] cstr;
     return true;
 }
-//发送两个矩阵
-bool Network::mSend(Matrix matrix1, Matrix matrix2)
+//发送一个string
+bool Network::mSend(string send_string)
 {
     int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    string matrix1_string, matrix2_string;
-    string matrix1_string_row = to_string(matrix1.row);
-    string matrix1_string_col = to_string(matrix1.col);
-    matrix1_string = matrix1_string_row + this->mDelim + matrix1_string_col + this->mDelim;
-    for (int mRow = 0; mRow < matrix1.row; mRow++)
-    {
-        for (int mCol = 0; mCol < matrix1.col; mCol++)
-        {
-            string temp = matrix1.matrix[mRow][mCol].get_str();
-            matrix1_string += temp;
-            if ((mRow < matrix1.row - 1) || (mCol < matrix1.col - 1))
-                matrix1_string += this->mDelim;
-        }
-    }
-    string matrix2_string_row = to_string(matrix2.row);
-    string matrix2_string_col = to_string(matrix2.col);
-    matrix2_string = matrix2_string_row + this->mDelim + matrix2_string_col + this->mDelim;
-    for (int mRow = 0; mRow < matrix2.row; mRow++)
-    {
-        for (int mCol = 0; mCol < matrix2.col; mCol++)
-        {
-            string temp = matrix2.matrix[mRow][mCol].get_str();
-            matrix2_string += temp;
-            if ((mRow < matrix2.row - 1) || (mCol < matrix2.col - 1))
-                matrix2_string += this->mDelim;
-        }
-    }
-    string send_string = matrix1_string + this->delim + matrix2_string;
     this->mSend(fd, send_string);
     return true;
 }
-//接收两个矩阵
-bool Network::mReceive(Matrix &matrix1, Matrix &matrix2)
+//接收一个string
+bool Network::mReceive(string &recv_string)
 {
     int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    char *cstr = this->mReceive(fd);
-
-    char *recv1 = strtok(cstr, this->delim);
-    char *recv2 = strtok(NULL, this->delim);
-
+    this->mReceive(fd, recv_string);
+    return true;
+}
+//发送mpz_class数
+bool Network::mSend(mpz_class send)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string send_string;
+    this->serialization(send, send_string);
+    this->mSend(fd, send_string);
+    return true;
+}
+//接收mpz_class数
+bool Network::mReceive(mpz_class &receive)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string recv_string;
+    this->mReceive(fd, recv_string);
+    char *cstr = new char[recv_string.size() + 1];
+    strcpy(cstr, recv_string.c_str());
+    this->deserialization(cstr, receive);
+    delete[] cstr;
+    return true;
+}
+//发送矩阵
+bool Network::mSend(Matrix matrix)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string send_string;
+    this->serialization(matrix, send_string);
+    this->mSend(fd, send_string);
+    return true;
+}
+//接收矩阵
+bool Network::mReceive(Matrix &matrix)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string recv_string;
+    this->mReceive(fd, recv_string);
+    char *cstr = new char[recv_string.size() + 1];
+    strcpy(cstr, recv_string.c_str());
+    Matrix matrix_recv;
+    this->deserialization(cstr, matrix_recv);
+    this->networkTools.mCopy(matrix_recv, matrix);
+    delete[] cstr;
+    return true;
+}
+//发送矩阵数组
+bool Network::mSend(array<Matrix, 5> array)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string send_string, recv_string;
+    for (int i = 0; i < 5; i++)
+    {
+        this->serialization(array[i], send_string); //序列化
+        this->mSend(send_string);                   //发送矩阵
+        this->mReceive(recv_string);                //接收对方已接收尺寸
+        if (recv_string != to_string(send_string.size()))
+        { //若尺寸不对
+            cout << i << ":recv_string: " << recv_string << " | send_string: " << to_string(send_string.size()) << endl;
+            exit(1);
+        }
+    }
+}
+//接收矩阵数组
+bool Network::mReceive(array<Matrix, 5> &array)
+{
+    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
+    string recv_string;
+    for (int i = 0; i < 5; i++)
+    {
+        Matrix temp;
+        this->mReceive(recv_string);                //接收矩阵
+        this->mSend(to_string(recv_string.size())); //发送接收尺寸
+        this->deserialization(recv_string, temp);   //反序列化
+        networkTools.mCopy(temp, array[i]);
+    }
+    return true;
+}
+//序列化
+bool Network::serialization(mpz_class num, string &num_ser)
+{
+    num_ser = num.get_str();
+    return true;
+}
+bool Network::serialization(Matrix matrix, string &matrix_ser)
+{
+    string matrix_string;
+    string matrix_string_row = to_string(matrix.row);
+    string matrix_string_col = to_string(matrix.col);
+    matrix_string = matrix_string_row + this->mDelim + matrix_string_col + this->mDelim;
+    for (int mRow = 0; mRow < matrix.row; mRow++)
+    {
+        for (int mCol = 0; mCol < matrix.col; mCol++)
+        {
+            string temp = matrix.matrix[mRow][mCol].get_str();
+            matrix_string += temp;
+            if ((mRow < matrix.row - 1) || (mCol < matrix.col - 1))
+                matrix_string += this->mDelim;
+        }
+    }
+    matrix_ser = matrix_string;
+    return true;
+}
+//反序列化
+bool Network::deserialization(string num_ser, mpz_class &num)
+{
+    num = mpz_class(num_ser, baseNum);
+    return true;
+}
+bool Network::deserialization(string matrix_ser, Matrix &matrix)
+{
     char *pch;
+    char *cstr = new char[matrix_ser.size() + 1];
+    strcpy(cstr, matrix_ser.c_str());
     int counts = 0, row, col;
-    pch = strtok(recv1, this->mDelim);
+    pch = strtok(cstr, this->mDelim);
     if (pch == NULL)
     {
         printf("Reveice matrix error!(1) : %s\n", strerror(errno));
@@ -213,174 +269,22 @@ bool Network::mReceive(Matrix &matrix1, Matrix &matrix2)
     }
     int matrix_col = atoi(pch);
 
-    Matrix matrix_one(M_NORMAL, 0, matrix_row, matrix_col);
+    Matrix matrix_temp(matrix_row, matrix_col);
     for (int i = 0; i < matrix_row; i++)
     {
         for (int j = 0; j < matrix_col; j++)
         {
             pch = strtok(NULL, this->mDelim);
-            long temp = atol(pch);
-            matrix_one.change(i, j, temp);
-        }
-    }
-
-    counts = 0;
-    pch = strtok(recv2, this->mDelim);
-    if (pch == NULL)
-    {
-        printf("Reveice matrix error!(3) : %s\n", strerror(errno));
-        exit(1);
-    }
-    matrix_row = atoi(pch);
-    pch = strtok(NULL, this->mDelim);
-    if (pch == NULL)
-    {
-        printf("Reveice matrix error!(4) : %s\n", strerror(errno));
-        exit(1);
-    }
-    matrix_col = atoi(pch);
-    Matrix matrix_two(M_NORMAL, 0, matrix_row, matrix_col);
-    for (int i = 0; i < matrix_row; i++)
-    {
-        for (int j = 0; j < matrix_col; j++)
-        {
-            pch = strtok(NULL, this->mDelim);
-            long temp = atol(pch);
-            matrix_two.change(i, j, temp);
-        }
-    }
-
-    this->networkTools.mCopy(matrix_one, matrix1);
-    this->networkTools.mCopy(matrix_two, matrix2);
-    delete[] cstr;
-    return true;
-}
-//发送两个矩阵数组
-bool Network::mSend(array<Matrix, 5> array1, array<Matrix, 5> array2)
-{
-    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    array<array<Matrix, 5>, 2> mArray{array1, array2};
-    string array1_string, array2_string;
-    string array_string[2] = {array1_string, array2_string};
-    string send_string;
-    for (int k = 0; k < 2; k++)
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            string matrix1_string_row = to_string(mArray[k][i].row);
-            string matrix1_string_col = to_string(mArray[k][i].col);
-            array_string[k] += (matrix1_string_row + this->mDelim + matrix1_string_col + this->mDelim);
-            for (int mRow = 0; mRow < mArray[k][i].row; mRow++)
-            {
-                for (int mCol = 0; mCol < mArray[k][i].col; mCol++)
-                {
-                    string temp = mArray[k][i].matrix[mRow][mCol].get_str();
-                    array_string[k] += temp;
-                    if ((mRow < mArray[k][i].row - 1) || (mCol < mArray[k][i].col - 1))
-                        array_string[k] += this->mDelim;
-                }
-            }
-            if (i < 4)
-                array_string[k] += this->aDelim;
-        }
-        send_string += array_string[k];
-        if (k < 1)
-            send_string += this->delim;
-    }
-    this->mSend(fd, send_string);
-    return true;
-}
-//接收两个矩阵数组
-bool Network::mReceive(array<Matrix, 5> &array1, array<Matrix, 5> &array2)
-{
-    int fd = (this->role == SERVER) ? this->sockCli : sockSer;
-    char *cstr = this->mReceive(fd);
-    char *cArray1 = strtok(cstr, this->delim);
-    char *cArray2 = strtok(NULL, this->delim);
-    char *arrays[2] = {cArray1, cArray2};
-    Matrix cmatrix1, cmatrix2, cmatrix3, cmatrix4, cmatrix5;
-    Matrix cmatrix6, cmatrix7, cmatrix8, cmatrix9, cmatrix10;
-    array<Matrix, 5> mArray1 = {cmatrix1, cmatrix2, cmatrix3, cmatrix4, cmatrix5};
-    array<Matrix, 5> mArray2 = {cmatrix6, cmatrix7, cmatrix8, cmatrix9, cmatrix10};
-    array<array<Matrix, 5>, 2> mArrays{mArray1, mArray2};
-    for (int k = 0; k < 2; k++)
-    {
-        char *matrix1 = strtok(arrays[k], this->aDelim);
-        if (matrix1 == NULL)
-        {
-            printf("Reveice matrix array error!(-1) : %s\n", strerror(errno));
-            exit(1);
-        }
-        char *matrix2 = strtok(NULL, this->aDelim);
-        if (matrix2 == NULL)
-        {
-            printf("Reveice matrix array error!(-2) : %s\n", strerror(errno));
-            exit(1);
-        }
-        char *matrix3 = strtok(NULL, this->aDelim);
-        if (matrix3 == NULL)
-        {
-            printf("Reveice matrix array error!(-3) : %s\n", strerror(errno));
-            exit(1);
-        }
-        char *matrix4 = strtok(NULL, this->aDelim);
-        if (matrix4 == NULL)
-        {
-            printf("Reveice matrix array error!(-4) : %s\n", strerror(errno));
-            exit(1);
-        }
-        char *matrix5 = strtok(NULL, this->aDelim);
-        if (matrix5 == NULL)
-        {
-            printf("Reveice matrix array error!(-5) : %s\n", strerror(errno));
-            exit(1);
-        }
-        char *matrixs[5] = {matrix1, matrix2, matrix3, matrix4, matrix5};
-        for (int t = 0; t < 5; t++)
-        {
-            char *pch;
-            int counts = 0, row = 0, col = 0;
-            pch = strtok(matrixs[t], this->mDelim);
             if (pch == NULL)
             {
-                printf("Reveice matrix array error!(1) : %s\n", strerror(errno));
+                cout << "Exchange error!(2)" << endl;
                 exit(1);
             }
-            int matrix_row = atoi(pch);
-            pch = strtok(NULL, this->mDelim);
-            if (pch == NULL)
-            {
-                printf("Reveice matrix array error!(2) : %s\n", strerror(errno));
-                exit(1);
-            }
-            int matrix_col = atoi(pch);
-
-            if (matrix_row <= 0 || matrix_col <= 0)
-            {
-                printf("Parsing error!");
-                exit(1);
-            }
-            Matrix matrix(M_NORMAL, 0, matrix_row, matrix_col);
-            for (int i = 0; i < matrix_row; i++)
-            {
-                for (int j = 0; j < matrix_col; j++)
-                {
-                    pch = strtok(NULL, this->mDelim);
-                    if (pch == NULL)
-                    {
-                        cout << "Exchange error!" << endl;
-                        exit(1);
-                    }
-                    long temp = atol(pch);
-                    matrix.change(i, j, temp);
-                }
-            }
-            this->networkTools.mCopy(matrix, mArrays[k][t]);
-            // mArrays[k][t] = matrix;
+            mpz_class temp = mpz_class(pch, 10);
+            matrix_temp.change(i, j, temp);
         }
     }
-    array1 = mArrays[0];
-    array2 = mArrays[1];
+    this->networkTools.mCopy(matrix_temp, matrix);
     delete[] cstr;
     return true;
 }

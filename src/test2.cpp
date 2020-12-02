@@ -1,6 +1,6 @@
-/* #include"lstm.h"
-int main(){
-    Lstm_network lstm;
-    lstm.init(CLIENT);
-    return 0;
-} */
+// #include"lstm.h"
+// int main(){
+//     Lstm_network lstm;
+//     lstm.init(CLIENT);
+//     return 0;
+// }
