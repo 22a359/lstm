@@ -4,7 +4,6 @@ void TriplesMul::init(eRole role)
 {
     this->role = role;
     network.init(this->role, port);
-    triads.init(this->role);
 }
 //矩阵三元组乘法
 void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
@@ -13,7 +12,7 @@ void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
     string ck_string = this->network.checkMSG, recv_string;
     this->mulgateTools.mResize(x.row, y.col, ans);
     Matrix Ex, Ey, E, Fx, Fy, F, temp;
-    MatrixTriples triad = triads.getTriples(x.row, x.col, y.col);
+    MatrixTriples triad = MulTriples.getTriples(x.row, x.col, y.col);
     this->mulgateTools.mSub(x, triad.a, Ex);
     this->mulgateTools.mSub(y, triad.b, Fx);
     this->network.mSend(Ex);
@@ -65,7 +64,7 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
     string ck_string = this->network.checkMSG, recv_string;
     mod = modNum;
     temp = 0;
-    IntTriples triad = triads.getTriples();
+    IntTriples triad = MulTriples.getTriples();
     this->mulgateTools.mojian(x, triad.a, Ex);
     this->mulgateTools.mojian(y, triad.b, Ey);
     this->network.mSend(Ex);

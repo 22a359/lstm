@@ -1,6 +1,6 @@
 #include "triples.h"
 using namespace std;
-void Triples::init(eRole role)
+void Triples::triplesGen(eRole role, int epochs)
 {
     this->role = role;
     network.init(role, this->port);
@@ -22,29 +22,32 @@ void Triples::init(eRole role)
     table[40][1][40] = this->m40m1m40;
     table[40][1][58] = this->m40m1m58;
     //生成三元组
-    creat(1, 1, 1, this->m1m1m1_counts);
-    creat(40, 58, 1, this->m40m58m1_counts);
-    creat(40, 40, 1, this->m40m40m1_counts);
-    creat(20, 40, 1, this->m20m40m1_counts);
-    creat(1, 20, 1, this->m1m20m1_counts);
-    creat(1, 1, 20, this->m1m1m20_counts);
-    creat(20, 20, 1, this->m20m20m1_counts);
-    creat(20, 1, 1, this->m20m1m1_counts);
-    creat(20, 1, 40, this->m20m1m40_counts);
-    creat(40, 40, 20, this->m40m40m20_counts);
-    creat(40, 20, 1, this->m40m20m1_counts);
-    creat(40, 1, 40, this->m40m1m40_counts);
-    creat(40, 1, 58, this->m40m1m58_counts);
+    for (int i = 0; i < epochs; i++)
+    {
+        creat(1, 1, 1, this->m1m1m1_counts, i);
+        creat(40, 58, 1, this->m40m58m1_counts, i);
+        creat(40, 40, 1, this->m40m40m1_counts, i);
+        creat(20, 40, 1, this->m20m40m1_counts, i);
+        creat(1, 20, 1, this->m1m20m1_counts, i);
+        creat(1, 1, 20, this->m1m1m20_counts, i);
+        creat(20, 20, 1, this->m20m20m1_counts, i);
+        creat(20, 1, 1, this->m20m1m1_counts, i);
+        creat(20, 1, 40, this->m20m1m40_counts, i);
+        creat(40, 40, 20, this->m40m40m20_counts, i);
+        creat(40, 20, 1, this->m40m20m1_counts, i);
+        creat(40, 1, 40, this->m40m1m40_counts, i);
+        creat(40, 1, 58, this->m40m1m58_counts, i);
+    }
 }
 //根据尺寸生成不同的三元组
-void Triples::creat(int m, int d, int n, int counts)
+void Triples::creat(int m, int d, int n, int counts, int flag)
 {
     if (m == 1 && d == 1 && n == 1)
     {
         cout << "\nGenerate 1×1 triples" << endl;
         for (int i = 0; i < counts; i++)
         {
-            this->createIntTriple();
+            this->createIntTriple(flag + i);
             cout << "No." << i << "\tGenerated" << endl;
         }
     }
@@ -53,13 +56,13 @@ void Triples::creat(int m, int d, int n, int counts)
         cout << "\nGenerate " << m << "×" << d << "×" << n << " triples" << endl;
         for (int i = 0; i < counts; i++)
         {
-            this->createMatrixTriple(m, d, n);
+            this->createMatrixTriple(m, d, n, flag + i);
             cout << "No." << i << "\tGenerated" << endl;
         }
     }
 }
-//生成普通三元组
-void Triples::createIntTriple()
+//生成普通三元组，并写入文件
+void Triples::createIntTriple(int flag)
 {
     mpz_class a, b, c, aTimesB;
     string index, ck_string = this->network.checkMSG, recv_string;
@@ -119,7 +122,10 @@ void Triples::createIntTriple()
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
     fileName += "_single.dat";
     ofstream outfile;
-    outfile.open(fileName, ios::app);
+    if (flag)
+        outfile.open(fileName, ios::app);
+    else
+        outfile.open(fileName, ios::out | ios::trunc);
     network.serialization(a, out_a);
     network.serialization(b, out_b);
     network.serialization(c, out_c);
@@ -127,8 +133,8 @@ void Triples::createIntTriple()
     outfile << out_string << endl;
     outfile.close();
 }
-//生成矩阵三元组
-void Triples::createMatrixTriple(int m, int d, int n)
+//生成矩阵三元组，并写入文件
+void Triples::createMatrixTriple(int m, int d, int n, int flag)
 {
     string index, ck_string = this->network.checkMSG, recv_string;
     mpz_class r = this->randNum();
@@ -211,7 +217,10 @@ void Triples::createMatrixTriple(int m, int d, int n)
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
     fileName += ("_matrix" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) + ":" + to_string(this->table[m][d][n]) + ".dat");
     ofstream outfile;
-    outfile.open(fileName, ios::app);
+    if (flag)
+        outfile.open(fileName, ios::app);
+    else
+        outfile.open(fileName, ios::out | ios::trunc);
     network.serialization(A, out_a);
     network.serialization(B, out_b);
     network.serialization(C, out_c);
@@ -219,6 +228,10 @@ void Triples::createMatrixTriple(int m, int d, int n)
     outfile << out_string << endl;
     outfile.close();
 }
+//读入文件里的普通三元组
+
+//读入文件里的矩阵三元组
+
 //获取一个普通三元组
 IntTriples Triples::getTriples()
 {
@@ -249,8 +262,8 @@ mpz_class Triples::randNum()
     mpz_urandomb(z, grt, randBit);
     mpz_mod(r, z, modNum.get_mpz_t());
     ans = mpz_class(r);
-    mpz_clear(z);
-    mpz_clear(r);
+    mpz_clears(z, r, NULL);
+    gmp_randclear(grt);
     return ans;
 }
 //生成随机序列号

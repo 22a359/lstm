@@ -42,31 +42,31 @@ public:
 
     IntTriples getTriples();
     MatrixTriples getTriples(int m, int d, int n);
-    void init(eRole role);
+    void triplesGen(eRole role, int epochs);
 
 private:
     Network network;
     MatrixTools tripleTools;
-    int port=40343;
-    void createMatrixTriple(int m, int d, int n);
-    void createIntTriple();
-    void creat(int m, int d, int n, int counts);
-    mpz_class randNum();//在大素数范围内生成随机数
-    string randIndex();//生成随机序列号
+    int port = 40343;
+    void creat(int m, int d, int n, int counts, int flag);
+    void createIntTriple(int flag);
+    void createMatrixTriple(int m, int d, int n, int flag);
+    mpz_class randNum(); //在大素数范围内生成随机数
+    string randIndex();  //生成随机序列号
     array<array<array<int, 58>, 58>, 58> table;
-    int m1m1m1_counts = 100;
-    int m40m58m1_counts = 100;
-    int m40m40m1_counts = 100;
-    int m20m40m1_counts = 100;
-    int m1m20m1_counts = 100;
-    int m1m1m20_counts = 100;
-    int m20m20m1_counts = 100;
-    int m20m1m1_counts = 100;
-    int m20m1m40_counts = 100;
-    int m40m40m20_counts = 100;
-    int m40m20m1_counts = 100;
-    int m40m1m40_counts = 100;
-    int m40m1m58_counts = 100;
+    int m1m1m1_counts = 1000000;
+    int m40m58m1_counts = 10000;
+    int m40m40m1_counts = 10000;
+    int m20m40m1_counts = 10000;
+    int m1m20m1_counts = 10000;
+    int m1m1m20_counts = 10000;
+    int m20m20m1_counts = 10000;
+    int m20m1m1_counts = 10000;
+    int m20m1m40_counts = 10000;
+    int m40m40m20_counts = 10000;
+    int m40m20m1_counts = 10000;
+    int m40m1m40_counts = 10000;
+    int m40m1m58_counts = 10000;
 };
 
 #endif

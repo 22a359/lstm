@@ -15,7 +15,8 @@ docs/*
 
 # build directory
 build*/
-misc*/
+build/
+misc/
 
 # CMake
 CMakeCache.txt

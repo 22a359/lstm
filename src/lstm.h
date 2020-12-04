@@ -1,6 +1,6 @@
-#include "matrix.h"
 #include "mulgate.h"
 #include "network.h"
+#include "matrix.h"
 using namespace std;
 TriplesMul triplesMul;
 MatrixTools lstmTools;
@@ -129,21 +129,24 @@ public:
     Lstm_layer4 layer4;
     Matrix output{M_NORMAL, 0, 1, 1};
     Matrix output_train{M_NORMAL, 0, 1, 1};
-    void init(eRole role);
+    void triplesGen(eRole role, int epochs);
 
 private:
-    int epochs = 150;
+    int epochs;
     void forwardNetwork();
     void backwardNetwork();
     void readIn();
 };
-
-void Lstm_network::init(eRole role)
+//三元组生成
+void Lstm_network::triplesGen(eRole role, int epochs)
 {
+    this->epochs = epochs;
     mpz_set_str(modNum.get_mpz_t(), modNumStr.c_str(), 10);
     this->role = role;
-    triplesMul.init(this->role);
-    cout << "\ntriples OK" << endl;
+    Triples triples;
+    cout << "\nTriples generat start!" << endl;
+    triples.triplesGen(this->role, epochs);
+    cout << "\nTriples generat done!" << endl;
 }
 
 void Lstm_layer_block::sigmoid(Matrix &matrix)

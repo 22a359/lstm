@@ -2,8 +2,8 @@
 using namespace std;
 mpz_class modNum;
 mpz_class eAndC = 4294967296;
-// string modNumStr = "618970019642690137449562111";
-string modNumStr = "40343";
+ string modNumStr = "618970019642690137449562111";
+//string modNumStr = "40343";
 Matrix::Matrix()
 {
     this->col = this->row = 0;
@@ -30,8 +30,7 @@ Matrix::Matrix(int row, int col)
             mpz_urandomb(z, grt, randBit);
             mpz_mod(r, z, modNum.get_mpz_t());
             this->matrix[i][j] = mpz_class(r);
-            mpz_clear(z);
-            mpz_clear(r);
+            mpz_clears(z, r, NULL);
         }
         gmp_randclear(grt);
     }
@@ -371,6 +370,7 @@ void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
+    mpz_clears(a, b, r, NULL);
 }
 //模累加,x+=y
 void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
@@ -388,6 +388,7 @@ void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
+    mpz_clears(a, b, r, NULL);
 }
 //本地模乘
 void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
@@ -400,4 +401,5 @@ void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
+    mpz_clears(a, b, r, NULL);
 }

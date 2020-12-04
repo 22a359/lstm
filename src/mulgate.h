@@ -19,7 +19,7 @@ public:
 private:
     MatrixTools mulgateTools;
     Network network;
-    Triples triads;
+    Triples MulTriples;
     int port = 30434;
 };
 #endif
