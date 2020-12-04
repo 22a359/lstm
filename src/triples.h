@@ -24,6 +24,11 @@ public:
     eRole role;
     array<stack<MatrixTriples>, 12> matrixTriples;
     stack<IntTriples> intTriples;
+    IntTriples getTriples();
+    MatrixTriples getTriples(int m, int d, int n);
+    void triplesGen(eRole role, int epochs);
+    bool deserialization(string in_string, mpz_class &index, mpz_class &a, mpz_class &b, mpz_class &c);
+    bool deserialization(string in_string, mpz_class &index, Matrix &a, Matrix &b, Matrix &c);
     enum mSize
     {
         m40m58m1,
@@ -39,10 +44,6 @@ public:
         m40m1m40,
         m40m1m58
     };
-
-    IntTriples getTriples();
-    MatrixTriples getTriples(int m, int d, int n);
-    void triplesGen(eRole role, int epochs);
 
 private:
     Network network;

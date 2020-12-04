@@ -232,7 +232,42 @@ void Triples::createMatrixTriple(int m, int d, int n, int flag)
 
 //读入文件里的矩阵三元组
 
-
+//三元组反序列化
+bool Triples::deserialization(string in_string, mpz_class &index, mpz_class &a, mpz_class &b, mpz_class &c)
+{
+    char *pch;
+    char *cstr = stringToChar(in_string);
+    pch = strtok(cstr, iDelim);
+    index = mpz_class(pch, baseNum); //分离出序号
+    pch = strtok(NULL, iDelim);      //剩下的三元组
+    pch = strtok(pch, tDelim);
+    a = mpz_class(pch, baseNum); //分离出a
+    pch = strtok(NULL, tDelim);
+    b = mpz_class(pch, baseNum); //分离出b
+    pch = strtok(NULL, tDelim);
+    c = mpz_class(pch, baseNum); //分离出c
+    delete[] cstr;
+    return true;
+}
+bool Triples::deserialization(string in_string, mpz_class &index, Matrix &a, Matrix &b, Matrix &c)
+{
+    char *pch1, *pch2;
+    char *cstr = stringToChar(in_string);
+    pch1 = strtok(cstr, iDelim);
+    index = mpz_class(pch1, baseNum); //分离出序号
+    pch1 = strtok(NULL, iDelim);      //剩下的三元组
+    pch2 = strtok(pch1, tDelim);
+    string a_string = pch2; //分离出a
+    pch2 = strtok(NULL, tDelim);
+    string b_string = pch2; //分离出b
+    pch2 = strtok(NULL, tDelim);
+    string c_string = pch2; //分离出c
+    network.deserialization(a_string, a);
+    network.deserialization(b_string, b);
+    network.deserialization(c_string, c);
+    delete[] cstr;
+    return true;
+}
 //获取一个普通三元组
 IntTriples Triples::getTriples()
 {

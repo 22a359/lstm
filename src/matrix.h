@@ -44,5 +44,6 @@ public:
     void mojian(mpz_class &x, mpz_class &y, mpz_class &z);
     void mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z);
     void mResize(int row, int col, Matrix &y);
+    bool mCmp(Matrix matrix_one,Matrix matrix_two); //矩阵比较，相同返回true，不同返回false
 };
 #endif

@@ -332,11 +332,26 @@ void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
     for (int i = 0; i < vector.row; i++)
         matrix.change(i, i, vector.matrix[i][0]);
 }
+//矩阵比较，相同返回true，不同返回false
+bool MatrixTools::mCmp(Matrix x, Matrix y)
+{
+    if (x.col != y.col || x.row != y.row)
+        return false;
+    for (int i = 0; i < x.row; i++)
+        for (int j = 0; j < x.col; j++)
+        {
+            mpz_class ans;
+            this->mojian(x.matrix[i][j], y.matrix[i][j], ans);
+            if (ans != 0)
+                return false;
+        }
+    return true;
+}
 //模加
 void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a,b,r,NULL);
+    mpz_inits(a, b, r, NULL);
     mpz_add(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
@@ -352,7 +367,7 @@ void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
 void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a,b,r,NULL);
+    mpz_inits(a, b, r, NULL);
     mpz_sub(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
@@ -363,7 +378,7 @@ void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a,b,r,NULL);
+    mpz_inits(a, b, r, NULL);
     mpz_mul(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());

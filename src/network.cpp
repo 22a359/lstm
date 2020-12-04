@@ -243,8 +243,7 @@ bool Network::deserialization(string num_ser, mpz_class &num)
 bool Network::deserialization(string matrix_ser, Matrix &matrix)
 {
     char *pch;
-    char *cstr = new char[matrix_ser.size() + 1];
-    strcpy(cstr, matrix_ser.c_str());
+    char *cstr = stringToChar(matrix_ser);
     int counts = 0, row, col;
     pch = strtok(cstr, mDelim);
     if (pch == NULL)

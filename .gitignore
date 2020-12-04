@@ -18,6 +18,7 @@ build*/
 build/
 misc/
 bin/
+temp/
 
 # CMake
 CMakeCache.txt
@@ -34,5 +35,3 @@ CTestTestfile.cmake
 .vscode/
 log1
 log2
-src/triplesCheck.cpp
-.gitignore

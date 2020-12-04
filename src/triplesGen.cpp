@@ -1,4 +1,4 @@
-/* #include "lstm.h"
+#include "lstm.h"
 int main()
 {
     Lstm_network lstm;
@@ -16,4 +16,4 @@ int main()
          << "\nEpochs is: " << epochs << endl;
     lstm.triplesGen(Role, epochs);
     return 0;
-} */
+}
