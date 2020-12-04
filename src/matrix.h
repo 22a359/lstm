@@ -1,34 +1,6 @@
 #ifndef __MATRIX__
 #define __MATRIX__
-
-#include <iostream>
-#include <vector>
-#include <random>
-#include <string>
-#include <array>
-#include <cassert>
-#include <stack>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <fstream>
-#include <iomanip>
-#include <gmp.h>
-#include <gmpxx.h>
-using namespace std;
-
-#define eRole bool
-#define SERVER true
-#define CLIENT false
-#define M_NORMAL true
-#define M_DIAGONAL false
-#define M_GAUSS true
-const int baseNum = 10;
-extern string modNumStr;
-extern mpz_class modNum;
-extern mpz_class eAndC;
-const mp_bitcnt_t randBit = 512;
-
+#include "global.h"
 class Matrix
 {
 public:
@@ -66,8 +38,6 @@ public:
     void mSub(Matrix &x, Matrix &y, Matrix &ans);        //矩阵减法
     void mLocalMul(Matrix &x, Matrix &y, Matrix &ans);   //矩阵本地乘法
     void mLocalMull(Matrix &x, Matrix &y, Matrix &ans);  //矩阵本地并列乘法
-        // void mDot(Matrix &matrix, Matrix &vector, Matrix &ans); //矩阵内积
-        // void vOuter(Matrix &x, Matrix &y, Matrix &ans);         //向量外积
     void mVector2Matrix(Matrix vector, Matrix &matrix);
     void mojia(mpz_class &x, mpz_class &y, mpz_class &z);
     void mAccu(mpz_class &x, mpz_class &y);

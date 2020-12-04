@@ -1,9 +1,5 @@
 #ifndef __NETWORK__
 #define __NETWORK__
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include "matrix.h"
 
 using namespace std;
@@ -39,9 +35,6 @@ private:
 	char recvSizeBuf[BUF_SIZE];
 	char checkBuf[BUF_SIZE];
 
-	char delim[2] = "|";
-	char mDelim[2] = ",";
-	char aDelim[2] = "-";
 	bool mSend(int fd, string send_string);
 	bool mReceive(int fd, string &recv_string);
 };

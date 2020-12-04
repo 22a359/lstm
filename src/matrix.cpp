@@ -1,9 +1,4 @@
 #include "matrix.h"
-using namespace std;
-mpz_class modNum;
-mpz_class eAndC = 4294967296;
- string modNumStr = "618970019642690137449562111";
-//string modNumStr = "40343";
 Matrix::Matrix()
 {
     this->col = this->row = 0;
@@ -312,28 +307,6 @@ void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
         }
     }
 }
-//矩阵与向量三元组内积
-// void MatrixTools::mDot(Matrix &matrix, Matrix &vector, Matrix &ans)
-// {
-//     assert(vector.row == 1 && matrix.col == vector.col);
-//     this->mResize(1, vector.col, ans);
-//     Matrix vectorT(M_NORMAL, 0, vector.col, 1);
-//     Matrix ansT(M_NORMAL, 0, vector.col, 1);
-//     this->mTrans(vector, vectorT);
-//     this->mMul(matrix, vectorT, ansT);
-//     this->mTrans(ansT, ans);
-// }
-// //向量三元组外积
-// void MatrixTools::vOuter(Matrix &x, Matrix &y, Matrix &ans)
-// {
-//     assert(x.row == y.row == 1);
-//     this->mResize(x.col, y.col, ans);
-//     Matrix xt(M_NORMAL, 0, x.col, 1);
-//     this->mTrans(x, xt);
-//     this->mMul(xt, y, ans);
-// }
-//矩阵尺寸重设
-
 //矩阵尺寸重设
 void MatrixTools::mResize(int row, int col, Matrix &matrix)
 {
@@ -363,9 +336,7 @@ void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
 void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_init(a);
-    mpz_init(b);
-    mpz_init(r);
+    mpz_inits(a,b,r,NULL);
     mpz_add(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
@@ -381,9 +352,7 @@ void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
 void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_init(a);
-    mpz_init(b);
-    mpz_init(r);
+    mpz_inits(a,b,r,NULL);
     mpz_sub(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
@@ -394,9 +363,7 @@ void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_init(a);
-    mpz_init(b);
-    mpz_init(r);
+    mpz_inits(a,b,r,NULL);
     mpz_mul(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());

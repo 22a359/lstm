@@ -232,6 +232,7 @@ void Triples::createMatrixTriple(int m, int d, int n, int flag)
 
 //读入文件里的矩阵三元组
 
+
 //获取一个普通三元组
 IntTriples Triples::getTriples()
 {
