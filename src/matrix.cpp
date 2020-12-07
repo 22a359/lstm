@@ -11,23 +11,16 @@ Matrix::Matrix(int row, int col)
     this->matrix.resize(this->row);
     for (int i = 0; i < this->row; i++)
     {
-        random_device rd;
-        default_random_engine e(rd());
-        gmp_randstate_t grt;
-        gmp_randinit_mt(grt);
-        gmp_randseed_ui(grt, e());
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
         {
-            mpz_t z, r;
-            mpz_init(z);
+            mpz_t r;
             mpz_init(r);
-            mpz_urandomb(z, grt, randBit);
-            mpz_mod(r, z, modNum.get_mpz_t());
+            mpz_class randNum = randNumGen();
+            mpz_mod(r, randNum.get_mpz_t(), modNum.get_mpz_t());
             this->matrix[i][j] = mpz_class(r);
-            mpz_clears(z, r, NULL);
+            mpz_clear(r);
         }
-        gmp_randclear(grt);
     }
 }
 //生成符合正态分布的矩阵
@@ -43,14 +36,15 @@ Matrix::Matrix(bool flag, int row, int col)
         {
             if (flag)
             {
-                normal_distribution<> dist;
+                normal_distribution<double> distribution(0.0, 0.5);
                 random_device rd;
                 default_random_engine rng{rd()};
                 double randNum;
-                while ((randNum = dist(rng)) > 1.0 || randNum < -1.0)
+                while ((randNum = distribution(rng)) > 1.0 || randNum < -1.0)
                     ;
-                int num = randNum * 1000;
-                this->matrix[i][j] = mpz_class(num);
+                mpf_class num = randNum;
+                mpf_mul_2exp(num.get_mpf_t(), num.get_mpf_t(), eAndC);
+                this->matrix[i][j] = num;
             }
         }
     }

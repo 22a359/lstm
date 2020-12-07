@@ -14,7 +14,7 @@ public:
     void mPow(Matrix &x, Matrix &ans);             //矩阵乘方
     void mPoww(Matrix &x, Matrix &ans);            //矩阵并列乘方
     void mocheng(mpz_class &x, mpz_class &y, mpz_class &z);
-    void init(eRole role);
+    void init(eRole role, int flag);
 
 private:
     MatrixTools mulgateTools;

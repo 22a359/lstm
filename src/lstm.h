@@ -13,7 +13,7 @@ MatrixTools lstmTools;
         M_NORMAL, 0, 40, 1 \
     }
 
-class Lstm_network;
+class Lstm;
 class Lstm_layer1;
 class Lstm_layer2;
 class Lstm_layer3;
@@ -39,7 +39,6 @@ public:
 
 private:
     mpz_class sig0 = 2147483648, sig1 = 1071300947, sig2 = 0, sig3 = -79372572;
-    int tan0 = 0, tan1 = 1, tan2 = 1, tan3 = 1;
 };
 
 class Lstm_layer4
@@ -117,36 +116,85 @@ public:
 private:
 };
 
-class Lstm_network
+class Lstm
 {
 public:
     eRole role;
-    void compute();
-    void train();
     Lstm_layer1 layer1;
     Lstm_layer2 layer2;
     Lstm_layer3 layer3;
     Lstm_layer4 layer4;
     Matrix output{M_NORMAL, 0, 1, 1};
     Matrix output_train{M_NORMAL, 0, 1, 1};
-    void triplesGen(eRole role, int epochs);
+    Lstm(eRole role, int epochs);
+    void compute();
+    void train();
+    void tripesInit(int flag);
+    void triplesGen();
 
 private:
     int epochs;
+    void dataReadIn(int flag);
     void forwardNetwork();
     void backwardNetwork();
-    void readIn();
 };
-//三元组生成
-void Lstm_network::triplesGen(eRole role, int epochs)
+
+Lstm::Lstm(eRole role, int epochs) : role(role), epochs(epochs)
 {
-    this->epochs = epochs;
     mpz_set_str(modNum.get_mpz_t(), modNumStr.c_str(), 10);
-    this->role = role;
+}
+
+//三元组生成
+void Lstm::triplesGen()
+{
     Triples triples;
     cout << "\nTriples generat start!" << endl;
     triples.triplesGen(this->role, epochs);
     cout << "\nTriples generat done!" << endl;
+}
+
+void Lstm::train()
+{
+    for (int i = 0; i < this->epochs; i++)
+    {
+        this->tripesInit(i);
+        this->dataReadIn(i);
+        // this->forwardNetwork();
+        // this->backwardNetwork();
+    }
+}
+
+void Lstm::tripesInit(int flag)
+{
+    triplesMul.init(this->role, flag);
+}
+
+void Lstm::dataReadIn(int flag){
+
+}
+
+void Lstm::forwardNetwork()
+{
+    this->layer1.forward();
+    this->layer2.forward(layer1);
+    this->layer3.forward(layer2);
+    this->layer4.forward(layer3);
+    lstmTools.mCopy(this->layer4.A4, this->output);
+    printf("forward ok\n");
+}
+
+void Lstm::backwardNetwork()
+{
+    lstmTools.mCopy(this->output_train, this->layer4.et);
+    this->layer4.backward(layer3);
+    this->layer3.backward(layer4, layer2);
+    this->layer2.backward(layer3, layer1);
+    this->layer1.backward(layer2);
+    printf("backward ok\n");
+}
+
+void Lstm::compute(){
+
 }
 
 void Lstm_layer_block::sigmoid(Matrix &matrix)
@@ -178,18 +226,6 @@ void Lstm_layer_block::tanh(Matrix &matrix)
     this->sigmoid(temp);
     lstmTools.mConstMul(temp, temp2, 2);
     lstmTools.mSub(temp2, const_one, matrix);
-    // Matrix powerAns1, powerAns2, addAns1, addAns2, addAns3;
-    // Matrix onceAns, twiceAns, thriceAns;
-    // Matrix tan_0(M_NORMAL, this->tan0, matrix.row, matrix.col); //零次项系数
-    // lstmTools.mConstMul(matrix, onceAns, this->tan1);               //一次项系数
-    // triplesMul.mPoww(matrix, powerAns1);                             //二次项
-    // lstmTools.mConstMul(powerAns1, twiceAns, this->tan2);           //二次项系数
-    // triplesMul.mMull(matrix, powerAns1, powerAns2);                  //三次项
-    // lstmTools.mConstMul(powerAns2, thriceAns, this->tan3);          //三次项系数
-    // lstmTools.mAdd(thriceAns, twiceAns, addAns1);                   //三次加二次
-    // lstmTools.mAdd(addAns1, onceAns, addAns2);                      //再加一次
-    // lstmTools.mAdd(addAns2, tan_0, addAns3);                        //再加零次
-    // lstmTools.mCopy(addAns3, matrix);
 }
 void Lstm_layer_block::tanh(Matrix &matrix, Matrix &ans)
 {
@@ -666,76 +702,3 @@ void Lstm_layer1::backward(Lstm_layer2 layer2)
     lstmTools.mConstMul(delta_bo, temp_S, this->block.learningRate);
     lstmTools.mAccuSub(this->Bo1, temp_S);
 }
-// Lstm_network::Lstm_network()
-// {
-// }
-
-void Lstm_network::train()
-{
-    // for (int i = 0; i < this->epochs; i++)
-    // {
-    //     forwardNetwork();
-    //     backwardNetwork();
-    //     readIn();
-    // }
-    forwardNetwork();
-    backwardNetwork();
-}
-
-void Lstm_network::forwardNetwork()
-{
-    this->layer1.forward();
-    this->layer2.forward(layer1);
-    this->layer3.forward(layer2);
-    this->layer4.forward(layer3);
-    lstmTools.mCopy(this->layer4.A4, this->output);
-    // printf("forward ok\n");
-}
-
-void Lstm_network::backwardNetwork()
-{
-    lstmTools.mCopy(this->output_train, this->layer4.et);
-    this->layer4.backward(layer3);
-    this->layer3.backward(layer4, layer2);
-    this->layer2.backward(layer3, layer1);
-    this->layer1.backward(layer2);
-    // printf("backward ok\n");
-}
-
-/* int main()
-{
-    cout << "hello" << endl;
-    Lstm_network lstm;
-    int data[20][58] = {297, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                        387, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                        458, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-                        342, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                        464, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                        628, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                        722, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-                        860, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                        748, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                        606, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-                        419, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                        464, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                        532, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                        221, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-                        198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                        203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                        498, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-                        599, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                        696, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                        480, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
-    for (int i = 0; i < 20; i++)
-    {
-        Matrix temp(58, 1, data[i]);
-        lstmTools.mCopy(temp, lstm.layer1.X[i]);
-    }
-    int et[1] = {552};
-    Matrix temp(1, 1, et);
-    lstmTools.mCopy(temp, lstm.output_train);
-    lstm.train();
-    // lstm.output.print();
-
-    return 0;
-} */

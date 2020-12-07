@@ -1,9 +1,13 @@
 #include "mulgate.h"
 using namespace std;
-void TriplesMul::init(eRole role)
+void TriplesMul::init(eRole role, int flag)
 {
-    this->role = role;
-    network.init(this->role, port);
+    MulTriples.init(role, flag);
+    if (!flag)
+    {
+        this->role = role;
+        network.init(this->role, port);
+    }
 }
 //矩阵三元组乘法
 void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
@@ -60,9 +64,8 @@ void TriplesMul::mPoww(Matrix &x, Matrix &ans)
 //三元组模乘，计算后缩小
 void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 {
-    mpz_class temp, mod, Ex, Ey, E, Fx, Fy, F;
+    mpz_class temp, Ex, Ey, E, Fx, Fy, F;
     string ck_string = this->network.checkMSG, recv_string;
-    mod = modNum;
     temp = 0;
     IntTriples triad = MulTriples.getTriples();
     this->mulgateTools.mojian(x, triad.a, Ex);
@@ -78,5 +81,6 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
     if (role == SERVER)
         temp = E * F;
     z = F * triad.a + E * triad.b + triad.c + temp;
-    z = (z / eAndC + mod) % mod;
+    mpz_div_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);         //缩小2^32倍
+    mpz_mod(z.get_mpz_t(), z.get_mpz_t(), modNum.get_mpz_t()); //取模
 }

@@ -32,14 +32,29 @@ using namespace std;
 extern int baseNum;
 extern string modNumStr;
 extern mpz_class modNum;
-extern mpz_class eAndC;
+extern mp_bitcnt_t eAndC;
 extern mp_bitcnt_t randBit;
 extern char tDelim[2];
 extern char mDelim[2];
 extern char iDelim[2];
 extern char checkMSG[3];
 
+extern int m1m1m1_counts;
+extern int m40m58m1_counts;
+extern int m40m40m1_counts;
+extern int m20m40m1_counts;
+extern int m1m20m1_counts;
+extern int m1m1m20_counts;
+extern int m20m20m1_counts;
+extern int m20m1m1_counts;
+extern int m20m1m40_counts;
+extern int m40m40m20_counts;
+extern int m40m20m1_counts;
+extern int m40m1m40_counts;
+extern int m40m1m58_counts;
+
 //将string转换为char*
 char *stringToChar(string in_string);
-
+//在大素数范围内生成随机数
+mpz_class randNumGen();
 #endif
