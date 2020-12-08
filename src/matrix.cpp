@@ -5,7 +5,7 @@ Matrix::Matrix()
 }
 //生成随机矩阵
 Matrix::Matrix(int row, int col)
-{
+{//慢
     this->row = row;
     this->col = col;
     this->matrix.resize(this->row);
@@ -108,7 +108,7 @@ Matrix::Matrix(int row, int col, mpz_class *array)
 //将第positionRow行，第positionCol列的数替换为num
 void Matrix::change(int positionRow, int positionCol, mpz_class num)
 {
-    this->matrix[positionRow][positionCol] = mpz_class(num);
+    mpz_set(this->matrix[positionRow][positionCol].get_mpz_t(),num.get_mpz_t());
 }
 //矩阵输出
 void Matrix::print()

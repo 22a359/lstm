@@ -9,19 +9,35 @@ char tDelim[2] = "-";
 char mDelim[2] = ",";
 char iDelim[2] = ":";
 char checkMSG[3] = "ok";
-int m1m1m1_counts = 5;
-int m40m58m1_counts = 5;
-int m40m40m1_counts = 5;
-int m20m40m1_counts = 5;
-int m1m20m1_counts = 5;
-int m1m1m20_counts = 5;
-int m20m20m1_counts = 5;
-int m20m1m1_counts = 5;
-int m20m1m40_counts = 5;
-int m40m40m20_counts = 5;
-int m40m20m1_counts = 5;
-int m40m1m40_counts = 5;
-int m40m1m58_counts = 5;
+int m1m1m1_counts = 49626;
+int m40m58m1_counts = 80;
+int m40m40m1_counts = 472;
+int m20m40m1_counts = 1;
+int m1m20m1_counts = 1;
+int m1m1m20_counts = 1;
+int m20m20m1_counts = 1;
+int m20m1m1_counts = 1;
+int m20m1m40_counts = 1;
+int m40m40m20_counts = 1;
+int m40m20m1_counts = 1;
+int m40m1m40_counts = 240;
+int m40m1m58_counts = 80;
+int m1m1m1_num = 0;
+int mTriples_num[12] = {0};
+int triples_num[13] = {m1m1m1_counts,
+                       m40m58m1_counts,
+                       m40m40m1_counts,
+                       m20m40m1_counts,
+                       m1m20m1_counts,
+                       m1m1m20_counts,
+                       m20m20m1_counts,
+                       m20m1m1_counts,
+                       m20m1m40_counts,
+                       m40m40m20_counts,
+                       m40m20m1_counts,
+                       m40m1m40_counts,
+                       m40m1m58_counts};
+time_t start, lastPoint;
 //将string转换为char*
 char *stringToChar(string in_string)
 {
@@ -32,10 +48,9 @@ char *stringToChar(string in_string)
 //在大素数范围内生成随机数
 mpz_class randNumGen()
 {
-    mpz_class ans;
+    mpz_class ans = 0;
     mpz_t z, r;
-    mpz_init(z);
-    mpz_init(r);
+    mpz_inits(z, r, NULL);
     random_device rd;
     default_random_engine e(rd());
     gmp_randstate_t grt;
@@ -43,8 +58,23 @@ mpz_class randNumGen()
     gmp_randseed_ui(grt, e());
     mpz_urandomb(z, grt, randBit);
     mpz_mod(r, z, modNum.get_mpz_t());
-    ans = mpz_class(r);
+    mpz_swap(ans.get_mpz_t(), r);
     mpz_clears(z, r, NULL);
     gmp_randclear(grt);
     return ans;
+}
+void showTime()
+{
+    time_t point = time(NULL);
+    time_t allTime = (double)(point - start);
+    time_t thisTime = (double)(point - lastPoint);
+    cout << "Using time: " << thisTime / 86400 << "d " << thisTime / 3600 % 24 << "h " << thisTime / 60 % 60 << "m " << thisTime % 60 << "s | "
+         << "Total time: " << allTime / 86400 << "d " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m " << allTime % 60 << "s" << endl;
+    lastPoint = point;
+}
+void showTime(int flag)
+{
+    time_t point = time(NULL);
+    time_t allTime = (double)(point - start);
+    cout << "Total time: " << allTime / 86400 << "d " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m " << allTime % 60 << "s" << endl;
 }

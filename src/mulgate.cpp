@@ -13,18 +13,31 @@ void TriplesMul::init(eRole role, int flag)
 void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
 { //得多次调用对应尺寸的矩阵乘法三元组
     assert(x.col == y.row);
+    if (x.row == 1 && x.col == 1 && y.col == 1)
+    {
+        mocheng(x.matrix[0][0], y.matrix[0][0], ans.matrix[0][0]);
+        return;
+    }
     string ck_string = this->network.checkMSG, recv_string;
     this->mulgateTools.mResize(x.row, y.col, ans);
     Matrix Ex, Ey, E, Fx, Fy, F, temp;
     MatrixTriples triad = MulTriples.getTriples(x.row, x.col, y.col);
     this->mulgateTools.mSub(x, triad.a, Ex);
     this->mulgateTools.mSub(y, triad.b, Fx);
-    this->network.mSend(Ex);
-    this->network.mReceive(recv_string);
-    this->network.mSend(Fx);
-    this->network.mReceive(Ey);
-    this->network.mSend(ck_string);
-    this->network.mReceive(Fy);
+    if (role == SERVER)
+    {
+        this->network.mSend(Ex);
+        this->network.mReceive(Ey);
+        this->network.mSend(Fx);
+        this->network.mReceive(Fy);
+    }
+    else
+    {
+        this->network.mReceive(Ey);
+        this->network.mSend(Ex);
+        this->network.mReceive(Fy);
+        this->network.mSend(Fx);
+    }
     this->mulgateTools.mAdd(Ex, Ey, E);
     this->mulgateTools.mAdd(Fx, Fy, F);
     if (role == SERVER)
@@ -70,12 +83,20 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
     IntTriples triad = MulTriples.getTriples();
     this->mulgateTools.mojian(x, triad.a, Ex);
     this->mulgateTools.mojian(y, triad.b, Ey);
-    this->network.mSend(Ex);
-    this->network.mReceive(recv_string);
-    this->network.mSend(Fx);
-    this->network.mReceive(Ey);
-    this->network.mSend(ck_string);
-    this->network.mReceive(Fy);
+    if (role == SERVER)
+    {
+        this->network.mSend(Ex);
+        this->network.mReceive(Ey);
+        this->network.mSend(Fx);
+        this->network.mReceive(Fy);
+    }
+    else
+    {
+        this->network.mReceive(Ey);
+        this->network.mSend(Ex);
+        this->network.mReceive(Fy);
+        this->network.mSend(Fx);
+    }
     this->mulgateTools.mojia(Ex, Ey, E);
     this->mulgateTools.mojia(Fx, Fy, F);
     if (role == SERVER)

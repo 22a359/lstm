@@ -41,6 +41,7 @@ void Triples::init(eRole role, int flag)
     this->readMatrixTriples(40, 1, 58, flag);
     cout << "Triples OK!" << endl;
 }
+//生成三元组
 void Triples::triplesGen(eRole role, int epochs)
 {
     this->role = role;
@@ -72,22 +73,26 @@ void Triples::creat(int m, int d, int n, int counts, int flag)
     if (m == 1 && d == 1 && n == 1)
     {
         fileName += ("_int_" + to_string(flag) + ".dat");
-        cout << "\nGenerate 1×1 triples" << endl;
+        cout << "\nGenerate " << triples_num[0] << " 1×1×1 triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createIntTriple(fileName, flag + i);
-            cout << "No." << i << "\tGenerated" << endl;
+            // printf("No.%.7d Generated\r", i);
+            cout << "No." << i + 1 << " Generated\r" << flush;
         }
+        showTime();
     }
     else
     {
         fileName += ("_matrix:" + to_string(this->table[m][d][n]) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) + "_" + to_string(flag) + ".dat");
-        cout << "\nGenerate " << m << "×" << d << "×" << n << " triples" << endl;
+        cout << "\nGenerate " << triples_num[this->table[m][d][n] + 1] << " " << m << "×" << d << "×" << n << " triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createMatrixTriple(fileName, m, d, n, flag + i);
-            cout << "No." << i << "\tGenerated" << endl;
+            // printf("No.%.7d Generated\r", i);
+            cout << "No." << i + 1 << " Generated\r" << flush;
         }
+        showTime();
     }
 }
 //生成普通三元组，并写入文件
@@ -332,7 +337,10 @@ IntTriples Triples::getTriples()
         exit(1);
     }
     IntTriples triples = this->intTriples.top();
-    this->intTriples.pop();
+    if (RELEASE)
+        this->intTriples.pop();
+    else
+        m1m1m1_num++;
     return triples;
 }
 //获取一个矩阵三元组
@@ -345,7 +353,10 @@ MatrixTriples Triples::getTriples(int m, int d, int n)
         exit(1);
     }
     MatrixTriples triples = this->matrixTriples[flag].top();
-    this->matrixTriples[flag].pop();
+    if (RELEASE)
+        this->matrixTriples[flag].pop();
+    else
+        mTriples_num[flag]++;
     return triples;
 }
 

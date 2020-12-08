@@ -68,6 +68,8 @@ void Network::init(eRole role, int port)
         }
     }
     cout << "Network OK!" << endl;
+    start = time(NULL);
+    lastPoint = start;
 }
 //发送一个string
 bool Network::mSend(int fd, string send_string)
@@ -268,7 +270,7 @@ bool Network::deserialization(string matrix_ser, Matrix &matrix)
     }
     int matrix_col = atoi(pch);
 
-    Matrix matrix_temp(matrix_row, matrix_col);
+    Matrix matrix_temp(M_NORMAL, 0, matrix_row, matrix_col);
     for (int i = 0; i < matrix_row; i++)
     {
         for (int j = 0; j < matrix_col; j++)

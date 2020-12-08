@@ -134,7 +134,7 @@ public:
 
 private:
     int epochs;
-    void dataReadIn(int flag);
+    void dataReadIn();
     void forwardNetwork();
     void backwardNetwork();
 };
@@ -155,12 +155,31 @@ void Lstm::triplesGen()
 
 void Lstm::train()
 {
+    this->dataReadIn();
     for (int i = 0; i < this->epochs; i++)
     {
+        cout << "Round " << i + 1 << ": Begin" << endl;
         this->tripesInit(i);
-        this->dataReadIn(i);
-        // this->forwardNetwork();
-        // this->backwardNetwork();
+        this->forwardNetwork();
+        this->backwardNetwork();
+        cout << "Round " << i + 1 << ": OK\n"
+             << endl;
+        if (!RELEASE)
+        {
+            cout << "1×1×1:\t" << m1m1m1_num << endl;
+            cout << "40×58×1:\t" << mTriples_num[0] << endl;
+            cout << "40×40×1:\t" << mTriples_num[1] << endl;
+            cout << "20×40×1:\t" << mTriples_num[2] << endl;
+            cout << "1×20×1:\t" << mTriples_num[3] << endl;
+            cout << "1×1×20:\t" << mTriples_num[4] << endl;
+            cout << "20×20×1:\t" << mTriples_num[5] << endl;
+            cout << "20×1×1:\t" << mTriples_num[6] << endl;
+            cout << "20×1×40:\t" << mTriples_num[7] << endl;
+            cout << "40×40×20:\t" << mTriples_num[8] << endl;
+            cout << "40×20×1:\t" << mTriples_num[9] << endl;
+            cout << "40×1×40:\t" << mTriples_num[10] << endl;
+            cout << "40×1×58:\t" << mTriples_num[11] << endl;
+        }
     }
 }
 
@@ -169,32 +188,93 @@ void Lstm::tripesInit(int flag)
     triplesMul.init(this->role, flag);
 }
 
-void Lstm::dataReadIn(int flag){
-
+void Lstm::dataReadIn()
+{
+    cout << "Data preparing" << flush;
+    string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    fileName += ".dat";
+    ifstream infile;
+    infile.open(fileName, ios::in);
+    string line;
+    mpz_class index, a, b, c;
+    char *pch;
+    for (int i = 0; i < 20; i++)
+    { //读入一次训练的20组数据
+        getline(infile, line);
+        char *cstr = stringToChar(line);
+        for (int j = 0; j < 58; j++)
+        {
+            if (j)
+                pch = strtok(NULL, mDelim);
+            else
+                pch = strtok(cstr, mDelim);
+            mpz_class temp = mpz_class(pch, 10);
+            this->layer1.X[i].change(j, 0, temp);
+        }
+        delete[] cstr;
+        cout << "." << flush;
+    }
+    getline(infile, line);
+    char *cstr = stringToChar(line);
+    pch = strtok(cstr, mDelim);
+    mpz_class temp = mpz_class(pch, 10);
+    this->output_train.change(0, 0, temp);
+    // lstmTools.mCopy(temp, this->output_train);
+    /* while (getline(infile, line) && infile.good() && !infile.eof() && line != "")
+    { //读入整个数据集
+        for (int i = 1; i < 20; i++)
+        { //读入一次训练的20组数据
+            // Matrix matrix_temp(M_NORMAL, 0, 58, 1);
+            char *pch;
+            char *cstr = stringToChar(line);
+            for (int j = 0; j < 58; j++)
+            {
+                pch = strtok(NULL, mDelim);
+                mpz_class temp = mpz_class(pch, 10);
+                this->layer1.X[i].change(i, j, temp);
+            }
+            getline(infile, line);
+            delete[] cstr;
+        }
+    } */
+    infile.close();
+    cout << "Data OK!" << endl;
 }
 
 void Lstm::forwardNetwork()
 {
+    cout << "forward begin " << flush;
     this->layer1.forward();
+    cout << ". " << flush;
     this->layer2.forward(layer1);
+    cout << ". " << flush;
     this->layer3.forward(layer2);
+    cout << ". " << flush;
     this->layer4.forward(layer3);
+    cout << ". " << flush;
     lstmTools.mCopy(this->layer4.A4, this->output);
-    printf("forward ok\n");
+    cout << "forward ok" << endl;
+    showTime();
 }
 
 void Lstm::backwardNetwork()
 {
+    cout << "backward begin " << flush;
     lstmTools.mCopy(this->output_train, this->layer4.et);
+    cout << ". " << flush;
     this->layer4.backward(layer3);
+    cout << ". " << flush;
     this->layer3.backward(layer4, layer2);
+    cout << ". " << flush;
     this->layer2.backward(layer3, layer1);
+    cout << ". " << flush;
     this->layer1.backward(layer2);
-    printf("backward ok\n");
+    cout << "backward ok" << endl;
+    showTime();
 }
 
-void Lstm::compute(){
-
+void Lstm::compute()
+{
 }
 
 void Lstm_layer_block::sigmoid(Matrix &matrix)

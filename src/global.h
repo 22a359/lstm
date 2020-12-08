@@ -28,6 +28,8 @@ using namespace std;
 #define M_NORMAL true
 #define M_DIAGONAL false
 #define M_GAUSS true
+// #define RELEASE false
+#define RELEASE true
 
 extern int baseNum;
 extern string modNumStr;
@@ -52,9 +54,14 @@ extern int m40m40m20_counts;
 extern int m40m20m1_counts;
 extern int m40m1m40_counts;
 extern int m40m1m58_counts;
-
+extern time_t start, lastPoint;
+extern int m1m1m1_num;
+extern int mTriples_num[12];
+extern int triples_num[13];
 //将string转换为char*
 char *stringToChar(string in_string);
 //在大素数范围内生成随机数
 mpz_class randNumGen();
+void showTime();
+void showTime(int flag);
 #endif
