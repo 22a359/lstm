@@ -1,4 +1,4 @@
-#include "lstm.h"
+ #include "../lstm.h"
 int main()
 {
     mpz_set_str(modNum.get_mpz_t(), modNumStr.c_str(), 10);

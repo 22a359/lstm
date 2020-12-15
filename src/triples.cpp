@@ -9,6 +9,7 @@ Triples::Triples()
             for (int k = 0; k < 58; k++)
                 this->table[i][j][k] = -1;
     table[40][58][1] = this->m40m58m1;
+//    table[1][2][1] = this->m40m58m1;
     table[40][40][1] = this->m40m40m1;
     table[20][40][1] = this->m20m40m1;
     table[1][20][1] = this->m1m20m1;
@@ -25,9 +26,10 @@ Triples::Triples()
 void Triples::init(eRole role, int flag)
 {
     this->role = role;
-    cout << "Triples preparing" << flush;
+    cout << "Triples preparing " << flush;
     this->readIntTriples(flag);
     this->readMatrixTriples(40, 58, 1, flag);
+//    this->readMatrixTriples(1, 2, 1, flag);
     this->readMatrixTriples(40, 40, 1, flag);
     this->readMatrixTriples(20, 40, 1, flag);
     this->readMatrixTriples(1, 20, 1, flag);
@@ -45,13 +47,14 @@ void Triples::init(eRole role, int flag)
 void Triples::triplesGen(eRole role, int epochs)
 {
     this->role = role;
-    network.init(role, this->port);
-
+    if (this->network.sockSer == -1)
+        this->network.init(role, this->port);
     //生成三元组
     for (int i = 0; i < epochs; i++)
     {
         creat(1, 1, 1, m1m1m1_counts, i);
         creat(40, 58, 1, m40m58m1_counts, i);
+//        creat(1, 2, 1, m40m58m1_counts, i);
         creat(40, 40, 1, m40m40m1_counts, i);
         creat(20, 40, 1, m20m40m1_counts, i);
         creat(1, 20, 1, m1m20m1_counts, i);
@@ -68,12 +71,14 @@ void Triples::triplesGen(eRole role, int epochs)
 //根据尺寸生成不同的三元组
 void Triples::creat(int m, int d, int n, int counts, int flag)
 {
+    if (this->network.sockSer == -1)
+        this->network.init(this->role, this->port);
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
     // fileName = "./triples/" + fileName;
     if (m == 1 && d == 1 && n == 1)
     {
         fileName += ("_int_" + to_string(flag) + ".dat");
-        cout << "\nGenerate " << triples_num[0] << " 1×1×1 triples" << endl;
+        cout << "Generate " << triples_num[0] << " 1×1×1 triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createIntTriple(fileName, flag + i);
@@ -85,7 +90,7 @@ void Triples::creat(int m, int d, int n, int counts, int flag)
     else
     {
         fileName += ("_matrix:" + to_string(this->table[m][d][n]) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) + "_" + to_string(flag) + ".dat");
-        cout << "\nGenerate " << triples_num[this->table[m][d][n] + 1] << " " << m << "×" << d << "×" << n << " triples" << endl;
+        cout << "Generate " << triples_num[this->table[m][d][n] + 1] << " " << m << "×" << d << "×" << n << " triples" << endl;
         for (int i = 0; i < counts; i++)
         {
             this->createMatrixTriple(fileName, m, d, n, flag + i);
@@ -99,7 +104,7 @@ void Triples::creat(int m, int d, int n, int counts, int flag)
 void Triples::createIntTriple(string fileName, int flag)
 {
     mpz_class a, b, c, aTimesB;
-    string index, ck_string = this->network.checkMSG, recv_string;
+    string index, ck_string = checkMSG, recv_string;
     a = randNumGen();
     b = randNumGen();
     c = randNumGen();
@@ -135,7 +140,7 @@ void Triples::createIntTriple(string fileName, int flag)
         Matrix Y(1, 5, array);
         Matrix R(1, 5);
         this->tripleTools.mSub(Y, R, Z);
-        this->tripleTools.mConstMul(Z, W, r.get_mpz_t());
+        this->tripleTools.mConstMulOrigin(Z, W, r.get_mpz_t());
         this->network.mSend(R);
         this->network.mReceive(recv_string);
         this->network.mSend(W);
@@ -166,7 +171,7 @@ void Triples::createIntTriple(string fileName, int flag)
 //生成矩阵三元组，并写入文件
 void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
 {
-    string index, ck_string = this->network.checkMSG, recv_string;
+    string index, ck_string = checkMSG, recv_string;
     mpz_class r = randNumGen();
     mpz_class r_inv;
     Matrix A{m, d}, B{d, n}, C{m, n}, aTimesB;
@@ -221,7 +226,7 @@ void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
         {
             this->tripleTools.mSub(Y[i], R[i], temp);
             this->tripleTools.mCopy(temp, W[i]);
-            this->tripleTools.mConstMul(W[i], temp, r.get_mpz_t());
+            this->tripleTools.mConstMulOrigin(W[i], temp, r.get_mpz_t());
             this->tripleTools.mCopy(temp, W[i]);
         }
         this->network.mSend(R);
@@ -231,7 +236,7 @@ void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
         this->network.mSend(ck_string);
         this->network.mReceive(V);
         mpz_invert(r_inv.get_mpz_t(), r.get_mpz_t(), modNum.get_mpz_t());
-        this->tripleTools.mConstMul(V, temp, r_inv.get_mpz_t());
+        this->tripleTools.mConstMulOrigin(V, temp, r_inv.get_mpz_t());
         this->tripleTools.mAdd(U, temp, C);
         //由于CLIENT计算c，因此在计算完后生成随机序列号发送给对方，作为两方三元组的对应标志
         index = this->randIndex();
@@ -261,8 +266,15 @@ void Triples::readIntTriples(int flag)
 {
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
     fileName += ("_int_" + to_string(flag) + ".dat");
+    string fileNameNew = "USED_" + fileName;
     ifstream infile;
     infile.open(fileName, ios::in);
+    if (!infile)
+    { //三元组文件不存在，则生成
+        cout << "\n1×1×1 triples not found" << endl;
+        this->creat(1, 1, 1, triples_num[0], 0);
+        infile.open(fileName, ios::in);
+    }
     string line;
     mpz_class index, a, b, c;
     while (getline(infile, line) && infile.good() && !infile.eof() && line != "")
@@ -271,16 +283,29 @@ void Triples::readIntTriples(int flag)
         IntTriples triples{index, a, b, c};
         this->intTriples.push(triples);
     }
-    cout << "." << flush;
+    infile.close();
+    //已读取的文件进行改名
+    if (RELEASE)
+        if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
+            cout << "Rename error" << endl;
+    cout << ". " << flush;
 }
 //读入文件里的矩阵三元组
 void Triples::readMatrixTriples(int m, int d, int n, int flag)
 {
+    int indexFlag = this->table[m][d][n];
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
-    fileName += ("_matrix:" + to_string(this->table[m][d][n]) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) + "_" + to_string(flag) + ".dat");
+    fileName += ("_matrix:" + to_string(indexFlag) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) + "_" + to_string(flag) + ".dat");
+    string fileNameNew = "USED_" + fileName;
     ifstream infile;
     infile.open(fileName, ios::in);
-    int indexFlag = this->table[m][d][n];
+    if (!infile)
+    { //三元组文件不存在，则生成
+        cout << "\n"
+             << m << "×" << d << "×" << n << " triples not found" << endl;
+        this->creat(m, d, n, triples_num[indexFlag + 1], 0);
+        infile.open(fileName, ios::in);
+    }
     string line;
     Matrix a, b, c;
     mpz_class index;
@@ -290,7 +315,12 @@ void Triples::readMatrixTriples(int m, int d, int n, int flag)
         MatrixTriples triples{index, a, b, c};
         this->matrixTriples[indexFlag].push(triples);
     }
-    cout << "." << flush;
+    infile.close();
+    //已读取的文件进行改名
+    if (RELEASE)
+        if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
+            cout << "Rename error" << endl;
+    cout << ". " << flush;
 }
 //三元组反序列化
 bool Triples::deserialization(string in_string, mpz_class &index, mpz_class &a, mpz_class &b, mpz_class &c)

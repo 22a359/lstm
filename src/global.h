@@ -25,14 +25,17 @@ using namespace std;
 #define eRole bool
 #define SERVER true
 #define CLIENT false
-#define M_NORMAL true
-#define M_DIAGONAL false
+#define M_DIAGONAL 0
+#define M_NORMAL 1
+#define M_CIPHER 2
 #define M_GAUSS true
-// #define RELEASE false
-#define RELEASE true
+#define RELEASE false
+//#define RELEASE true
+#define LOG true
+//#define LOG false
 
 extern int baseNum;
-extern string modNumStr;
+//extern string modNumStr;
 extern mpz_class modNum;
 extern mp_bitcnt_t eAndC;
 extern mp_bitcnt_t randBit;
@@ -40,7 +43,10 @@ extern char tDelim[2];
 extern char mDelim[2];
 extern char iDelim[2];
 extern char checkMSG[3];
-
+extern mpz_class sig0;
+extern mpz_class sig1;
+extern mpz_class sig2;
+extern mpz_class sig3;
 extern int m1m1m1_counts;
 extern int m40m58m1_counts;
 extern int m40m40m1_counts;
@@ -58,10 +64,17 @@ extern time_t start, lastPoint;
 extern int m1m1m1_num;
 extern int mTriples_num[12];
 extern int triples_num[13];
+
 //将string转换为char*
 char *stringToChar(string in_string);
+
 //在大素数范围内生成随机数
 mpz_class randNumGen();
+
 void showTime();
+
 void showTime(int flag);
+
+void mpz_print(mpz_class num, string out_word);
+
 #endif

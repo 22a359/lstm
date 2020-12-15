@@ -3,7 +3,7 @@ using namespace std;
 //网络初始化
 void Network::init(eRole role, int port)
 {
-    cout << "Network preparing" << flush;
+    cout << "Network preparing " << flush;
     this->role = role;
     this->port = port;
     //创建socket
@@ -12,7 +12,7 @@ void Network::init(eRole role, int port)
         printf("Socket error : %s\n", strerror(errno));
         exit(1);
     }
-    cout << "." << flush;
+    cout << ". " << flush;
     //填充套接字地址结构，包括地址族，ip和端口号
     bzero(&this->addrSer, sizeof(struct sockaddr_in));
     inet_aton(ipAddr, &(this->addrSer.sin_addr));
@@ -26,7 +26,7 @@ void Network::init(eRole role, int port)
     // 发送缓冲区
     int nSendBuf = 8 * 1024; //设置为8K
     setsockopt(this->sockSer, SOL_SOCKET, SO_SNDBUF, (const char *)&nSendBuf, sizeof(int));
-    cout << "." << flush;
+    cout << ". " << flush;
     if (this->role == SERVER)
     {
         //绑定
@@ -35,14 +35,14 @@ void Network::init(eRole role, int port)
             printf("Bind error : %s\n", strerror(errno));
             exit(1);
         }
-        cout << "." << flush;
+        cout << ". " << flush;
         // 监听
         if (listen(sockSer, 1) == -1)
         {
             printf("Listen error : %s\n", strerror(errno));
             exit(1);
         }
-        cout << "." << flush;
+        cout << ". " << flush;
         //接受
         socklen_t naddr = sizeof(struct sockaddr_in);
         if ((this->sockCli = accept(this->sockSer, (struct sockaddr *)(&this->addrCli), &naddr)) == -1)
@@ -50,7 +50,7 @@ void Network::init(eRole role, int port)
             printf("Accept error%s\n", strerror(errno));
             exit(1);
         }
-        cout << "." << flush;
+        cout << ". " << flush;
     }
     else
     {
@@ -58,7 +58,7 @@ void Network::init(eRole role, int port)
         int times = 1;
         while (connect(sockSer, (struct sockaddr *)&this->addrSer, sizeof(struct sockaddr)) == -1)
         {
-            cout << "." << flush;
+            cout << ". " << flush;
             sleep(times++);
             if (times > 11)
             {

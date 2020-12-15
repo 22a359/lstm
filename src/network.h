@@ -24,13 +24,12 @@ public:
 	bool deserialization(string num_ser, mpz_class &num);	 //反序列化
 	bool deserialization(string matrix_ser, Matrix &matrix); //反序列化
 	~Network();
-	char checkMSG[3] = "ok";
+	int sockSer = -1, sockCli = -1;
 
 private:
 	MatrixTools networkTools;
 	char *ipAddr = (char *)"127.0.0.1";
 	int port;
-	int sockSer, sockCli;
 	struct sockaddr_in addrSer, addrCli;
 	char recvSizeBuf[BUF_SIZE];
 	char checkBuf[BUF_SIZE];

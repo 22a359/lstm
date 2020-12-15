@@ -1,11 +1,13 @@
 #include "matrix.h"
+
 Matrix::Matrix()
 {
     this->col = this->row = 0;
 }
+
 //生成随机矩阵
 Matrix::Matrix(int row, int col)
-{//慢
+{ //慢
     this->row = row;
     this->col = col;
     this->matrix.resize(this->row);
@@ -23,6 +25,7 @@ Matrix::Matrix(int row, int col)
         }
     }
 }
+
 //生成符合正态分布的矩阵
 Matrix::Matrix(bool flag, int row, int col)
 {
@@ -34,45 +37,54 @@ Matrix::Matrix(bool flag, int row, int col)
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
         {
-            if (flag)
-            {
-                normal_distribution<double> distribution(0.0, 0.5);
-                random_device rd;
-                default_random_engine rng{rd()};
-                double randNum;
-                while ((randNum = distribution(rng)) > 1.0 || randNum < -1.0)
-                    ;
-                mpf_class num = randNum;
-                mpf_mul_2exp(num.get_mpf_t(), num.get_mpf_t(), eAndC);
-                this->matrix[i][j] = num;
-            }
+            random_device rd;
+            default_random_engine rng{rd()};
+            uniform_real_distribution<double> distribution(-0.1, 0.1);
+            double randNum;
+            while ((randNum = distribution(rng)) > 1.0 || randNum < -1.0);
+            mpf_class num = randNum;
+            mpf_mul_2exp(num.get_mpf_t(), num.get_mpf_t(), eAndC);
+            this->matrix[i][j] = num;
         }
     }
 }
-//生成满矩阵或对角矩阵
-Matrix::Matrix(bool flag, mpz_class num, int row, int col)
+
+//生成满矩阵或对角矩阵或加密运算满矩阵
+Matrix::Matrix(int flag, mpz_class num, int row, int col)
 {
     this->row = row;
     this->col = col;
     mpz_class zero = 0;
+    mpz_class temp;
+    mpz_mul_2exp(temp.get_mpz_t(), num.get_mpz_t(), eAndC);
+    mpz_div_2exp(temp.get_mpz_t(), temp.get_mpz_t(), 1);
     this->matrix.resize(this->row);
     for (int i = 0; i < this->row; i++)
     {
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
         {
-            if (flag)
-                this->matrix[i][j] = mpz_class(num);
-            else
+            switch (flag)
             {
-                if (j == i)
+                case M_NORMAL:
                     this->matrix[i][j] = mpz_class(num);
-                else
-                    this->matrix[i][j] = mpz_class(zero);
+                    break;
+                case M_DIAGONAL:
+                    if (j == i)
+                        this->matrix[i][j] = mpz_class(num);
+                    else
+                        this->matrix[i][j] = mpz_class(zero);
+                    break;
+                case M_CIPHER:
+                    this->matrix[i][j] = mpz_class(temp);
+                    break;
+                default:
+                    break;
             }
         }
     }
 }
+
 //生成指定内容的矩阵
 Matrix::Matrix(int row, int col, int *array)
 {
@@ -89,6 +101,7 @@ Matrix::Matrix(int row, int col, int *array)
         }
     }
 }
+
 //生成指定内容的矩阵
 Matrix::Matrix(int row, int col, mpz_class *array)
 {
@@ -105,11 +118,13 @@ Matrix::Matrix(int row, int col, mpz_class *array)
         }
     }
 }
+
 //将第positionRow行，第positionCol列的数替换为num
 void Matrix::change(int positionRow, int positionCol, mpz_class num)
 {
-    mpz_set(this->matrix[positionRow][positionCol].get_mpz_t(),num.get_mpz_t());
+    mpz_set(this->matrix[positionRow][positionCol].get_mpz_t(), num.get_mpz_t());
 }
+
 //矩阵输出
 void Matrix::print()
 {
@@ -123,8 +138,12 @@ void Matrix::print()
     }
     printf("\n");
 }
-void Matrix::print(int flag)
+
+void Matrix::print(string out_word)
 {
+    cout << out_word;
+    if (!(this->row == 1 && this->col == 1))
+        cout << endl;
     for (int i = 0; i < this->row; i++)
     {
         for (int j = 0; j < this->col; j++)
@@ -149,6 +168,7 @@ void MatrixTools::print(Matrix &m)
     }
     printf("\n");
 }
+
 //矩阵复制
 void MatrixTools::mCopy(Matrix &from, Matrix &to)
 {
@@ -161,6 +181,7 @@ void MatrixTools::mCopy(Matrix &from, Matrix &to)
         }
     }
 }
+
 //矩阵转置
 void MatrixTools::mTrans(Matrix &from, Matrix &to)
 {
@@ -173,6 +194,7 @@ void MatrixTools::mTrans(Matrix &from, Matrix &to)
         }
     }
 }
+
 //向量截取，舍弃向量from的前trunNum个元素，截取后面的部分存于向量ans中
 void MatrixTools::vTrun(int trunNum, Matrix &from, Matrix &to)
 {
@@ -182,6 +204,7 @@ void MatrixTools::vTrun(int trunNum, Matrix &from, Matrix &to)
         to.matrix[0][i] = from.matrix[0][i + trunNum];
     }
 }
+
 //向量拼接
 void MatrixTools::vConcat(Matrix &x, Matrix &y, Matrix &ans)
 {
@@ -197,6 +220,7 @@ void MatrixTools::vConcat(Matrix &x, Matrix &y, Matrix &ans)
         ans.matrix[0][i + j] = y.matrix[0][i];
     }
 }
+
 //矩阵加法
 void MatrixTools::mAdd(Matrix &x, Matrix &y, Matrix &ans)
 {
@@ -210,6 +234,7 @@ void MatrixTools::mAdd(Matrix &x, Matrix &y, Matrix &ans)
         }
     }
 }
+
 //矩阵累加,x+=y
 void MatrixTools::mAccu(Matrix &x, Matrix &y)
 {
@@ -217,6 +242,7 @@ void MatrixTools::mAccu(Matrix &x, Matrix &y)
     this->mAdd(x, y, temp);
     this->mCopy(temp, x);
 }
+
 //矩阵累减,x-=y
 void MatrixTools::mAccuSub(Matrix &x, Matrix &y)
 {
@@ -224,8 +250,9 @@ void MatrixTools::mAccuSub(Matrix &x, Matrix &y)
     this->mSub(x, y, temp);
     this->mCopy(temp, x);
 }
-//矩阵常数乘法
-void MatrixTools::mConstMul(Matrix &x, Matrix &ans, int num)
+
+//矩阵常数乘法，不截断
+void MatrixTools::mConstMulOrigin(Matrix x, Matrix &ans, mpz_ptr num)
 {
     this->mResize(x.row, x.col, ans);
     for (int i = 0; i < x.row; i++)
@@ -237,19 +264,22 @@ void MatrixTools::mConstMul(Matrix &x, Matrix &ans, int num)
         }
     }
 }
-//矩阵常数乘法
-void MatrixTools::mConstMul(Matrix &x, Matrix &ans, mpz_ptr num)
+
+void MatrixTools::mConstMulF(Matrix x, Matrix &ans, float num)
 {
     this->mResize(x.row, x.col, ans);
     for (int i = 0; i < x.row; i++)
     {
         for (int j = 0; j < x.col; j++)
         {
-            mpz_class zz(num);
-            this->mLocalMocheng(x.matrix[i][j], zz, ans.matrix[i][j]); //使用本地模乘
+            int num_int = num * 100;
+            mpz_class zz(num_int), temp;
+            this->mLocalMocheng(zz, x.matrix[i][j], temp); //使用本地模乘
+            mpz_div_ui(ans.matrix[i][j].get_mpz_t(), temp.get_mpz_t(), 100);
         }
     }
 }
+
 //矩阵减法
 void MatrixTools::mSub(Matrix &x, Matrix &y, Matrix &ans)
 {
@@ -266,6 +296,7 @@ void MatrixTools::mSub(Matrix &x, Matrix &y, Matrix &ans)
         }
     }
 }
+
 //矩阵本地乘法，用于三元组生成
 void MatrixTools::mLocalMul(Matrix &x, Matrix &y, Matrix &ans)
 {
@@ -288,6 +319,7 @@ void MatrixTools::mLocalMul(Matrix &x, Matrix &y, Matrix &ans)
         }
     }
 }
+
 //矩阵三元组LSTM乘法
 void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
 {
@@ -301,6 +333,7 @@ void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
         }
     }
 }
+
 //矩阵尺寸重设
 void MatrixTools::mResize(int row, int col, Matrix &matrix)
 {
@@ -318,6 +351,7 @@ void MatrixTools::mResize(int row, int col, Matrix &matrix)
         }
     }
 }
+
 //向量扩展为对角矩阵
 void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
 {
@@ -326,6 +360,7 @@ void MatrixTools::mVector2Matrix(Matrix vector, Matrix &matrix)
     for (int i = 0; i < vector.row; i++)
         matrix.change(i, i, vector.matrix[i][0]);
 }
+
 //矩阵比较，相同返回true，不同返回false
 bool MatrixTools::mCmp(Matrix x, Matrix y)
 {
@@ -341,6 +376,7 @@ bool MatrixTools::mCmp(Matrix x, Matrix y)
         }
     return true;
 }
+
 //模加
 void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 {
@@ -352,11 +388,13 @@ void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
     z = mpz_class(r);
     mpz_clears(a, b, r, NULL);
 }
+
 //模累加,x+=y
 void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
 {
     this->mojia(x, y, x);
 }
+
 //模减
 void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
 {
@@ -368,8 +406,9 @@ void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
     z = mpz_class(r);
     mpz_clears(a, b, r, NULL);
 }
+
 //本地模乘
-void MatrixTools::mLocalMocheng(mpz_class &x, mpz_class &y, mpz_class &z)
+void MatrixTools::mLocalMocheng(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
     mpz_inits(a, b, r, NULL);
