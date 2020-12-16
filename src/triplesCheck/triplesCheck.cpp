@@ -42,8 +42,8 @@ int main()
         tool.mAdd(c0, c1, C);
         tool.mLocalMul(A, B, temp_mul);
         tool.mSub(C, temp_mul, ans);
-        Matrix cons_zero{M_NORMAL, 0, ans.row, ans.col};
-        if (tool.mCmp(ans, cons_zero))
+        Matrix const_zero{M_NORMAL, 0, ans.row, ans.col};
+        if (tool.mCmp(ans, const_zero))
             flag = true;
     }
     if (flag)

@@ -47,7 +47,6 @@ public:
     // void relu(Matrix &matrix);
     float learningRate = 0.25;
     // float learningRate = 0.02;
-
 };
 
 class Lstm_layer4
@@ -202,39 +201,53 @@ void Lstm::train()
         // this->tripesInit(i);
         this->tripesInit(0);
 
-        //        Matrix mX, mY, manss;
-        //        mpz_class X1, Y1, X2, Y2;
-        ////        mpz_class rate = 4294967296;
-        //        mpz_class rate = 16777216;
-        //        if (this->role == SERVER)
-        //        {
-        //            mpz_set_str(X1.get_mpz_t(), "20", 10);
-        //            mpz_set_str(X2.get_mpz_t(), "35", 10);
-        //            mpz_set_str(Y1.get_mpz_t(), "40", 10);
-        //            mpz_set_str(Y2.get_mpz_t(), "53", 10);
-        //        } else
-        //        {
-        //            mpz_set_str(X1.get_mpz_t(), "24", 10);
-        //            mpz_set_str(X2.get_mpz_t(), "63", 10);
-        //            mpz_set_str(Y1.get_mpz_t(), "20", 10);
-        //            mpz_set_str(Y2.get_mpz_t(), "50", 10);
-        //        }
-        //        Matrix temp1{M_NORMAL, 0, 1, 2};
-        //        Matrix temp2{M_NORMAL, 0, 2, 1};
-        //        temp1.change(0, 0, X1);
-        //        temp1.change(0, 1, X2);
-        //        temp2.change(0, 0, Y1);
-        //        temp2.change(1, 0, Y2);
-        //        lstmTools.mConstMulOrigin(temp1, mX, rate.get_mpz_t());
-        //        lstmTools.mConstMulOrigin(temp2, mY, rate.get_mpz_t());
-        //        mX.print("X");
-        //        mY.print("Y");
-        //        triplesMul.mMul(mX, mY, manss);
-        ////        triplesMul.mocheng(X, Y, anss);
-        //        triplesMul.getPlain(mX, "明文X");
-        //        triplesMul.getPlain(mY, "明文Y");
-        //        triplesMul.getPlain(manss, "明文结果");
-        //        return;
+        Matrix mX, mY, manss;
+        // mpz_class X1, Y1, X2, Y2;
+        mpz_class X1, X2, X3, X4, X5;
+        //        mpz_class rate = 4294967296;
+        mpz_class rate = 16777216;
+        if (this->role == SERVER)
+        {
+            mpz_set_str(X1.get_mpz_t(), "2", 10);
+            mpz_set_str(X2.get_mpz_t(), "2", 10);
+            mpz_set_str(X3.get_mpz_t(), "1", 10);
+            mpz_set_str(X4.get_mpz_t(), "2", 10);
+            mpz_set_str(X5.get_mpz_t(), "2", 10);
+            // mpz_set_str(Y1.get_mpz_t(), "40", 10);
+            // mpz_set_str(Y2.get_mpz_t(), "53", 10);
+        }
+        else
+        {
+            mpz_set_str(X1.get_mpz_t(), "-2", 10);
+            mpz_set_str(X2.get_mpz_t(), "-1", 10);
+            mpz_set_str(X3.get_mpz_t(), "1", 10);
+            mpz_set_str(X4.get_mpz_t(), "1", 10);
+            mpz_set_str(X5.get_mpz_t(), "2", 10);
+            // mpz_set_str(Y1.get_mpz_t(), "20", 10);
+            // mpz_set_str(Y2.get_mpz_t(), "50", 10);
+        }
+        Matrix temp1{M_NORMAL, 0, 1, 1};
+        // Matrix temp1{M_NORMAL, 0, 1, 5};
+        // Matrix temp2{M_NORMAL, 0, 2, 1};
+        temp1.change(0, 0, X3);
+        // temp1.change(0, 0, X1);
+        // temp1.change(0, 1, X2);
+        // temp1.change(0, 2, X3);
+        // temp1.change(0, 3, X4);
+        // temp1.change(0, 4, X5);
+        // temp2.change(0, 0, Y1);
+        // temp2.change(1, 0, Y2);
+        lstmTools.mConstMulOrigin(temp1, mX, rate.get_mpz_t());
+        // lstmTools.mConstMulOrigin(temp2, mY, rate.get_mpz_t());
+        mX.print("X");
+        // mY.print("Y");
+        // triplesMul.mMul(mX, mY, manss);
+        triplesMul.getPlain(mX, "明文X");
+        triplesMul.sigmoid(mX);
+        //        triplesMul.mocheng(X, Y, anss);
+        // triplesMul.getPlain(mY, "明文Y");
+        triplesMul.getPlain(mX, "明文sigmoid");
+        return;
 
         //        mpz_class X, Y, anss;
         //        if (this->role == SERVER)
@@ -262,7 +275,7 @@ void Lstm::train()
 
         mpf_class ans;
         triplesMul.getPlain(this->output, ans);
-        cout << "ANS" << i << ": " << ans.get_d() << endl;
+        cout << "ANS " << i + 1 << ": " << ans.get_d() << endl;
 
         this->backwardNetwork();
         cout << "Round " << i + 1 << ": OK\n"
@@ -295,7 +308,7 @@ void Lstm::compute()
     this->forwardNetwork();
     mpf_class ans;
     triplesMul.getPlain(this->output, ans);
-    cout << "ANS:" << ans.get_d() << endl;
+    cout << "ANS: " << ans.get_d() << endl;
     //    this->output.print();
     // gmp_printf("Result is: %.*Ff\n", ans.get_str(,));
 }
@@ -402,7 +415,7 @@ void Lstm_layer1::forward()
     Matrix temp40t1_1, temp40t1_2, temp40t1_3;
     Matrix temp_Sj;
     for (int round = 0; round < 20; round++)
-    {//
+    { //
         //求f
         //求f
         triplesMul.mMul(this->Wfx1, this->X[round], temp40t1_1);
@@ -605,14 +618,9 @@ void Lstm_layer2::backward(Lstm_layer3 layer3, Lstm_layer1 layer1)
     Matrix delta_bft, delta_bit, delta_bgt, delta_bot;
     Matrix delta_Wfx2t, delta_Wix2t, delta_Wgx2t, delta_Wox2t;
     Matrix delta_Wfh2t, delta_Wih2t, delta_Wgh2t, delta_Woh2t;
-    Matrix delta_bf{M_NORMAL, 0, 40, 1}, delta_bi{M_NORMAL, 0, 40, 1}, delta_bg{M_NORMAL, 0, 40, 1}, delta_bo{M_NORMAL,
-                                                                                                              0, 40, 1};
-    Matrix delta_Wfx2{M_NORMAL, 0, 40, 40}, delta_Wix2{M_NORMAL, 0, 40, 40}, delta_Wgx2{M_NORMAL, 0, 40,
-                                                                                        40}, delta_Wox2{M_NORMAL, 0, 40,
-                                                                                                        40};
-    Matrix delta_Wfh2{M_NORMAL, 0, 40, 40}, delta_Wih2{M_NORMAL, 0, 40, 40}, delta_Wgh2{M_NORMAL, 0, 40,
-                                                                                        40}, delta_Woh2{M_NORMAL, 0, 40,
-                                                                                                        40};
+    Matrix delta_bf{M_NORMAL, 0, 40, 1}, delta_bi{M_NORMAL, 0, 40, 1}, delta_bg{M_NORMAL, 0, 40, 1}, delta_bo{M_NORMAL, 0, 40, 1};
+    Matrix delta_Wfx2{M_NORMAL, 0, 40, 40}, delta_Wix2{M_NORMAL, 0, 40, 40}, delta_Wgx2{M_NORMAL, 0, 40, 40}, delta_Wox2{M_NORMAL, 0, 40, 40};
+    Matrix delta_Wfh2{M_NORMAL, 0, 40, 40}, delta_Wih2{M_NORMAL, 0, 40, 40}, delta_Wgh2{M_NORMAL, 0, 40, 40}, delta_Woh2{M_NORMAL, 0, 40, 40};
     lstmTools.mTrans(layer3.W3, W3_trans);
     triplesMul.mMul(G2, W3_trans, temp40t20_1);
     triplesMul.mMul(temp40t20_1, layer3.delta_b3, Ht); //H
@@ -760,14 +768,9 @@ void Lstm_layer1::backward(Lstm_layer2 layer2)
     Matrix delta_bft, delta_bit, delta_bgt, delta_bot;
     Matrix delta_Wfx1t, delta_Wix1t, delta_Wgx1t, delta_Wox1t;
     Matrix delta_Wfh1t, delta_Wih1t, delta_Wgh1t, delta_Woh1t;
-    Matrix delta_bf{M_NORMAL, 0, 40, 1}, delta_bi{M_NORMAL, 0, 40, 1}, delta_bg{M_NORMAL, 0, 40, 1}, delta_bo{M_NORMAL,
-                                                                                                              0, 40, 1};
-    Matrix delta_Wfx1{M_NORMAL, 0, 40, 58}, delta_Wix1{M_NORMAL, 0, 40, 58}, delta_Wgx1{M_NORMAL, 0, 40,
-                                                                                        58}, delta_Wox1{M_NORMAL, 0, 40,
-                                                                                                        58};
-    Matrix delta_Wfh1{M_NORMAL, 0, 40, 40}, delta_Wih1{M_NORMAL, 0, 40, 40}, delta_Wgh1{M_NORMAL, 0, 40,
-                                                                                        40}, delta_Woh1{M_NORMAL, 0, 40,
-                                                                                                        40};
+    Matrix delta_bf{M_NORMAL, 0, 40, 1}, delta_bi{M_NORMAL, 0, 40, 1}, delta_bg{M_NORMAL, 0, 40, 1}, delta_bo{M_NORMAL, 0, 40, 1};
+    Matrix delta_Wfx1{M_NORMAL, 0, 40, 58}, delta_Wix1{M_NORMAL, 0, 40, 58}, delta_Wgx1{M_NORMAL, 0, 40, 58}, delta_Wox1{M_NORMAL, 0, 40, 58};
+    Matrix delta_Wfh1{M_NORMAL, 0, 40, 40}, delta_Wih1{M_NORMAL, 0, 40, 40}, delta_Wgh1{M_NORMAL, 0, 40, 40}, delta_Woh1{M_NORMAL, 0, 40, 40};
 
     lstmTools.mCopy(layer2.X20, Ht); //H
     triplesMul.mMull(Ht, this->O[19], temp40t1_1);

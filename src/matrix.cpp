@@ -141,7 +141,7 @@ void Matrix::print()
 
 void Matrix::print(string out_word)
 {
-    cout << out_word;
+    cout << out_word<<": ";
     if (!(this->row == 1 && this->col == 1))
         cout << endl;
     for (int i = 0; i < this->row; i++)

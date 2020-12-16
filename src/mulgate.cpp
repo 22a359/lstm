@@ -68,19 +68,19 @@ void TriplesMul::mMul(Matrix &x, Matrix &y, Matrix &ans)
                 if (role == SERVER)
                 {
                     mpz_class temp_div;
-                    temp_div = modNum - z;//先模减
+                    temp_div = modNum - z; //先模减
                     //                mpz_print(temp_div, "模减");
                     //                if (temp_div < z)
                     //                {
-                    mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC);         //缩小
-                    z = modNum - z;//再模减
+                    mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC); //缩小
+                    z = modNum - z;                                              //再模减
                     //                mpz_print(z, "学姐方法");
                     //                } else
                     //                {
                     //                    mpz_div_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);
                     //                }
                 } else
-                    mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);         //缩小2^32倍
+                    mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC); //缩小2^32倍
                 //            mpz_print(z, "ans");
                 //            getPlain(z, "明文");
             }
@@ -158,7 +158,6 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
     //    mpz_print(E, "E");
     //    mpz_print(F, "F");
 
-
     if (role == SERVER)
     {
         mpz_mul(temp4.get_mpz_t(), E.get_mpz_t(), F.get_mpz_t());
@@ -184,19 +183,19 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
         if (role == SERVER)
         {
             mpz_class temp_div;
-            temp_div = modNum - z;//先模减
+            temp_div = modNum - z; //先模减
             //        mpz_print(temp_div, "模减");
             //        if (temp_div < z)
             //        {
-            mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC);         //缩小
-            z = modNum - z;//再模减
+            mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC); //缩小
+            z = modNum - z;                                              //再模减
             //            mpz_print(z, "学姐方法");
             //        } else
             //        {
             //            mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);
             //        }
         } else
-            mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);         //缩小2^32倍
+            mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC); //缩小2^32倍
     }
     //    mpz_div_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);         //缩小2^32倍
     //    mpz_print(z, "ans");
@@ -211,7 +210,6 @@ void TriplesMul::mocheng(mpz_class &x, mpz_class &y, mpz_class &z)
 
     //    mpz_print(z, "缩小后");
     //    getPlain(z, "缩小后明文");
-
 }
 
 //矩阵常数乘法，截断
@@ -223,54 +221,83 @@ void TriplesMul::mConstMul(Matrix x, Matrix &ans, mpz_ptr num)
         for (int j = 0; j < x.col; j++)
         {
             mpz_class zz(num);
+            // mpz_print(zz,"b");
+            // x.print("x");
             this->mulgateTools.mLocalMocheng(x.matrix[i][j], zz, ans.matrix[i][j]); //使用本地模乘
+            ans.print("未截断");
+            this->getPlain(ans, "未截断明文");
             mpz_class z = ans.matrix[i][j];
             if (z != 0)
             {
                 if (role == SERVER)
                 {
                     mpz_class temp_div;
-                    temp_div = modNum - z;//先模减
-                    mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC);         //缩小
-                    z = modNum - z;//再模减
+                    temp_div = modNum - z; //先模减
+                    mpz_print(temp_div, "模减");
+                    //if (temp_div < z)
+                    //{
+                    mpz_tdiv_q_2exp(z.get_mpz_t(), temp_div.get_mpz_t(), eAndC); //缩小
+                    z = modNum - z;                                              //再模减
+                    mpz_print(z, "间接截断");
+                    //} else
+                    //{
+                    //    mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);
+                    //    mpz_print(z, "直接截断");
+                    //}
                 } else
-                    mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC);         //缩小
+                {
+                    mpz_tdiv_q_2exp(z.get_mpz_t(), z.get_mpz_t(), eAndC); //缩小
+                    mpz_print(z, "直接截断");
+                }
             }
             ans.matrix[i][j] = z;
+
         }
     }
 }
 
 void TriplesMul::sigmoid(Matrix &matrix)
-{//a+bx+cx^2+dx^3
+{ //a+bx+cx^2+dx^3
     Matrix powerAns1, powerAns2, addAns1, addAns2, addAns3;
     Matrix onceAns, twiceAns, thriceAns, msig_0;
     if (this->role)
     {
-        Matrix temp{M_NORMAL, sig0, matrix.row, matrix.col};        //零次项系数,a
+        Matrix temp{M_NORMAL, sig0, matrix.row, matrix.col}; //零次项系数,a
         mulgateTools.mCopy(temp, msig_0);
     } else
     {
-        Matrix temp{M_NORMAL, 0, matrix.row, matrix.col};        //零次项系数,a
+        Matrix temp{M_NORMAL, 0, matrix.row, matrix.col}; //零次项系数,a
         mulgateTools.mCopy(temp, msig_0);
     }
-    //sig_0.print("a");
-    this->mConstMul(matrix, onceAns, sig1.get_mpz_t());      //乘一次项系数，bx
-    //triplesMul.getPlain(onceAns, "bx");
-    this->mPoww(matrix, powerAns1);                               //二次项，x^2
-    //triplesMul.getPlain(powerAns1, "x^2");
-    this->mConstMul(powerAns1, twiceAns, sig2.get_mpz_t());  //二次项系数，cx^2
-    //triplesMul.getPlain(twiceAns, "cx^2");
-    this->mMull(matrix, powerAns1, powerAns2);                    //三次项，x^3
-    //triplesMul.getPlain(powerAns2, "x^3");
+    matrix.print("x");
+    this->getPlain(matrix, "x明文");
+    msig_0.print("a明文");
+    this->getPlain(msig_0, "a明文");
+    mpz_print(sig1, "b明文");
+    this->mConstMul(matrix, onceAns, sig1.get_mpz_t()); //乘一次项系数，bx
+    // this->getPlain(sig1, "b明文");
+    onceAns.print("bx");
+    this->getPlain(onceAns, "bx明文");
+    this->mPoww(matrix, powerAns1); //二次项，x^2
+    powerAns1.print("x^2");
+    this->getPlain(powerAns1, "x^2明文");
+    mpz_print(sig2, "c明文");
+    this->mConstMul(powerAns1, twiceAns, sig2.get_mpz_t()); //二次项系数，cx^2
+    // this->getPlain(sig2, "c明文");
+    this->getPlain(twiceAns, "cx^2");
+    this->mMull(matrix, powerAns1, powerAns2); //三次项，x^3
+    mpz_print(sig3, "d明文");
+    powerAns2.print("x^3");
+    this->getPlain(powerAns2, "x^3明文");
     this->mConstMul(powerAns2, thriceAns, sig3.get_mpz_t()); //三次项系数，dx^3
-    //triplesMul.getPlain(thriceAns, "dx^3");
-    mulgateTools.mAdd(thriceAns, twiceAns, addAns1);                      //三次加二次，cx^2 + dx^3
-    mulgateTools.mAdd(addAns1, onceAns, addAns2);                         //再加一次，bx + cx^2 + dx^3
-    mulgateTools.mAdd(addAns2, msig_0, addAns3);                           //再加零次，a + bx + cx^2 + dx^3
-    mulgateTools.mCopy(addAns3, matrix);//结果
+    // this->getPlain(sig3, "d明文");
+    this->getPlain(thriceAns, "dx^3明文");
+    mulgateTools.mAdd(thriceAns, twiceAns, addAns1); //三次加二次，cx^2 + dx^3
+    mulgateTools.mAdd(addAns1, onceAns, addAns2);    //再加一次，bx + cx^2 + dx^3
+    mulgateTools.mAdd(addAns2, msig_0, addAns3);     //再加零次，a + bx + cx^2 + dx^3
+    mulgateTools.mCopy(addAns3, matrix);             //结果
     //matrix.print("a + bx + cx^2 + dx^3");
-    //this->getPlain(matrix, "a + bx + cx^2 + dx^3");
+    this->getPlain(matrix, "a + bx + cx^2 + dx^3");
 }
 
 void TriplesMul::tanh(Matrix &matrix, Matrix &ans)
@@ -325,10 +352,12 @@ void TriplesMul::getPlain(Matrix cipher, string outputWord)
         this->network.mSend(cipher1);
     }
     this->mulgateTools.mAdd(cipher1, cipher2, temp);
-    cout << outputWord << ": " << endl;
+    cout << outputWord << ": ";
+    if (!(cipher.row == 1 && cipher.col == 1))
+        cout << endl;
     for (int i = 0; i < temp.row; i++)
     {
-        printf("\n");
+
         for (int j = 0; j < temp.col; j++)
         {
             mpz_class tempZ, tempMod;
@@ -350,8 +379,9 @@ void TriplesMul::getPlain(Matrix cipher, string outputWord)
             } else
                 gmp_printf("(%d-%d) %Zd\t", i, j, temp.matrix[i][j].get_mpz_t());
         }
+        printf("\n");
     }
-    printf("\n\n");
+    printf("\n");
 }
 
 //恢复明文结果

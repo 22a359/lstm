@@ -17,6 +17,7 @@ char checkMSG[3] = "ok";
 mpz_class sig0{"8388608", 10};
 mpz_class sig1{"4184769", 10};
 mpz_class sig2{"0", 10};
+//mpz_class sig3{"-310049", 10};
 mpz_class sig3{"618970019642690137449252062", 10};
 /* int m1m1m1_counts = 49626;
 int m40m58m1_counts = 80;
