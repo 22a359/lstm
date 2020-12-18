@@ -1,25 +1,24 @@
 #include "global.h"
 
-mpz_class modNum{"618970019642690137449562111", 10};
 int baseNum = 10;
 mp_bitcnt_t randBit = 512;
-//mp_bitcnt_t eAndC = 32;
-mp_bitcnt_t eAndC = 24;
+mp_bitcnt_t eAndC = 32;
+mpz_class modNum{"1248878241464690322159961483223834105349154894079", 10};//160bit
 //mpz_class eAndC{"4294967296", 10};//2^32
 //mpz_class eAndC{"16777216", 10};//2^24
-//string modNumStr = "17";//小素数
 //string modNumStr = "40343";//小素数
 //string modNumStr = "618970019642690137449562111"; //大素数
 char tDelim[2] = "-";
 char mDelim[2] = ",";
 char iDelim[2] = ":";
 char checkMSG[3] = "ok";
-mpz_class sig0{"8388608", 10};
-mpz_class sig1{"4184769", 10};
+mpz_class sig0{"2147483648", 10};
+mpz_class sig1{"1071300947", 10};
 mpz_class sig2{"0", 10};
-//mpz_class sig3{"-310049", 10};
-mpz_class sig3{"618970019642690137449252062", 10};
-/* int m1m1m1_counts = 49626;
+mpz_class sig3{"-79372572", 10};
+mpz_class learningRate{"1073741824", 10};
+char symbol[4] = {'|', '/', '-', '\\'};
+int m1m1m1_counts = 49626;
 int m40m58m1_counts = 80;
 int m40m40m1_counts = 472;
 int m20m40m1_counts = 1;
@@ -31,9 +30,9 @@ int m20m1m40_counts = 1;
 int m40m40m20_counts = 1;
 int m40m20m1_counts = 1;
 int m40m1m40_counts = 240;
-int m40m1m58_counts = 80; */
+int m40m1m58_counts = 80;
 
-int m1m1m1_counts = 1;
+/*int m1m1m1_counts = 1;
 int m40m58m1_counts = 1;
 int m40m40m1_counts = 1;
 int m20m40m1_counts = 1;
@@ -45,7 +44,7 @@ int m20m1m40_counts = 1;
 int m40m40m20_counts = 1;
 int m40m20m1_counts = 1;
 int m40m1m40_counts = 1;
-int m40m1m58_counts = 1;
+int m40m1m58_counts = 1;*/
 
 int m1m1m1_num = 0;
 int mTriples_num[12] = {0};
@@ -113,9 +112,6 @@ void showTime(int flag)
 
 void mpz_print(mpz_class num, string out_word)
 {
-    if (LOG)
-    {
-        cout << out_word << ": ";
-        cout << num.get_str() << endl;
-    }
+    cout << out_word << ": ";
+    cout << num.get_str() << endl;
 }

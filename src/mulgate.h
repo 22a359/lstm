@@ -12,21 +12,23 @@ class TriplesMul
 public:
     eRole role;
 
-    void mMul(Matrix &x, Matrix &y, Matrix &ans);  //矩阵乘法
-    void mMull(Matrix &x, Matrix &y, Matrix &ans); //矩阵并列乘法
-    void mPow(Matrix &x, Matrix &ans);             //矩阵乘方
-    void mPoww(Matrix &x, Matrix &ans);            //矩阵并列乘方
-    void mocheng(mpz_class &x, mpz_class &y, mpz_class &z);
-    void mConstMul(Matrix x, Matrix &ans, mpz_ptr num);
-    void sigmoid(Matrix &matrix);
-    void tanh(Matrix &matrix, Matrix &ans);
-    void init(eRole role, int flag);
+    void mMul(Matrix x, Matrix y, Matrix &ans);  //矩阵乘法
 
-    void getPlain(Matrix Cipher1, mpf_class &ans);
+    void mMull(Matrix x, Matrix y, Matrix &ans); //矩阵并列乘法
+    void mPoww(Matrix x, Matrix &ans);            //矩阵并列乘方
+    void mocheng(mpz_class x, mpz_class y, mpz_class &z);
+
+    void mConstMul(Matrix x, Matrix &ans, mpz_ptr num);
+
+    void sigmoid(Matrix &matrix);
+
+    void tanh(Matrix matrix, Matrix &ans);
+
+    void init(eRole role, int flag);
 
     void getPlain(Matrix cipher, string outputWord);
 
-    void getPlain(mpz_class cipher, string outputWord);
+    mpf_class getPlain(mpz_class cipher, string outputWord);
 
 private:
     MatrixTools mulgateTools;

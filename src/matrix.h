@@ -35,28 +35,28 @@ private:
 class MatrixTools
 {
 public:
-    void print(Matrix &m);                              //矩阵输出
-    void mCopy(Matrix &from, Matrix &to);               //矩阵复制
-    void mTrans(Matrix &from, Matrix &to);              //矩阵转置
-    void vTrun(int turnNum, Matrix &from, Matrix &to);  //向量截取
-    void vConcat(Matrix &x, Matrix &y, Matrix &ans);    //向量拼接
-    void mAdd(Matrix &x, Matrix &y, Matrix &ans);       //矩阵加法
-    void mAccu(Matrix &x, Matrix &y);                   //矩阵累加,x+=y
-    void mAccuSub(Matrix &x, Matrix &y);                //矩阵累减,x-=y
+    void print(Matrix m);                              //矩阵输出
+    void mCopy(Matrix from, Matrix &to);               //矩阵复制
+    void mTrans(Matrix from, Matrix &to);              //矩阵转置
+    void vTrun(int turnNum, Matrix from, Matrix &to);  //向量截取
+    void vConcat(Matrix x, Matrix y, Matrix &ans);    //向量拼接
+    void mAdd(Matrix x, Matrix y, Matrix &ans);       //矩阵加法
+    void mAccu(Matrix &x, Matrix y);                   //矩阵累加,x+=y
+    void mAccu(mpz_class &x, mpz_class y);
+
+    void mAccuSub(Matrix &x, Matrix y);                //矩阵累减,x-=y
     void mConstMulF(Matrix x, Matrix &ans, float num);  //矩阵常数乘法
     //void mConstMul(Matrix x, Matrix &ans, mpz_ptr num); //矩阵常数乘法
     void mConstMulOrigin(Matrix x, Matrix &ans, mpz_ptr num);
 
-    void mSub(Matrix &x, Matrix &y, Matrix &ans);       //矩阵减法
-    void mLocalMul(Matrix &x, Matrix &y, Matrix &ans);  //矩阵本地乘法
-    void mLocalMull(Matrix &x, Matrix &y, Matrix &ans); //矩阵本地并列乘法
+    void mSub(Matrix x, Matrix y, Matrix &ans);       //矩阵减法
+    void mLocalMul(Matrix x, Matrix y, Matrix &ans);  //矩阵本地乘法
+    void mLocalMull(Matrix x, Matrix y, Matrix &ans); //矩阵本地并列乘法
     void mVector2Matrix(Matrix vector, Matrix &matrix);
 
-    void mojia(mpz_class &x, mpz_class &y, mpz_class &z);
+    void mojia(mpz_class x, mpz_class y, mpz_class &z);
 
-    void mAccu(mpz_class &x, mpz_class &y);
-
-    void mojian(mpz_class &x, mpz_class &y, mpz_class &z);
+    void mojian(mpz_class x, mpz_class y, mpz_class &z);
 
     void mLocalMocheng(mpz_class x, mpz_class y, mpz_class &z);
 

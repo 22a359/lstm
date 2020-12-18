@@ -29,16 +29,13 @@ using namespace std;
 #define M_NORMAL 1
 #define M_CIPHER 2
 #define M_GAUSS true
-#define RELEASE false
-//#define RELEASE true
-#define LOG true
-//#define LOG false
-
+//#define RELEASE false
+#define RELEASE true
 extern int baseNum;
-//extern string modNumStr;
 extern mpz_class modNum;
 extern mp_bitcnt_t eAndC;
 extern mp_bitcnt_t randBit;
+extern char symbol[4];
 extern char tDelim[2];
 extern char mDelim[2];
 extern char iDelim[2];
@@ -47,6 +44,7 @@ extern mpz_class sig0;
 extern mpz_class sig1;
 extern mpz_class sig2;
 extern mpz_class sig3;
+extern mpz_class learningRate;
 extern int m1m1m1_counts;
 extern int m40m58m1_counts;
 extern int m40m40m1_counts;

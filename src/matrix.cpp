@@ -141,7 +141,7 @@ void Matrix::print()
 
 void Matrix::print(string out_word)
 {
-    cout << out_word<<": ";
+    cout << out_word << ": ";
     if (!(this->row == 1 && this->col == 1))
         cout << endl;
     for (int i = 0; i < this->row; i++)
@@ -156,7 +156,7 @@ void Matrix::print(string out_word)
 }
 
 //矩阵输出
-void MatrixTools::print(Matrix &m)
+void MatrixTools::print(Matrix m)
 {
     for (int i = 0; i < m.row; i++)
     {
@@ -170,7 +170,7 @@ void MatrixTools::print(Matrix &m)
 }
 
 //矩阵复制
-void MatrixTools::mCopy(Matrix &from, Matrix &to)
+void MatrixTools::mCopy(Matrix from, Matrix &to)
 {
     this->mResize(from.row, from.col, to);
     for (int i = 0; i < from.row; i++)
@@ -183,7 +183,7 @@ void MatrixTools::mCopy(Matrix &from, Matrix &to)
 }
 
 //矩阵转置
-void MatrixTools::mTrans(Matrix &from, Matrix &to)
+void MatrixTools::mTrans(Matrix from, Matrix &to)
 {
     this->mResize(from.col, from.row, to);
     for (int i = 0; i < to.row; i++)
@@ -196,7 +196,7 @@ void MatrixTools::mTrans(Matrix &from, Matrix &to)
 }
 
 //向量截取，舍弃向量from的前trunNum个元素，截取后面的部分存于向量ans中
-void MatrixTools::vTrun(int trunNum, Matrix &from, Matrix &to)
+void MatrixTools::vTrun(int trunNum, Matrix from, Matrix &to)
 {
     this->mResize(1, from.col - trunNum, to);
     for (int i = 0; i < to.col; i++)
@@ -206,7 +206,7 @@ void MatrixTools::vTrun(int trunNum, Matrix &from, Matrix &to)
 }
 
 //向量拼接
-void MatrixTools::vConcat(Matrix &x, Matrix &y, Matrix &ans)
+void MatrixTools::vConcat(Matrix x, Matrix y, Matrix &ans)
 {
     this->mResize(1, x.col + y.col, ans);
     int i, j;
@@ -222,7 +222,7 @@ void MatrixTools::vConcat(Matrix &x, Matrix &y, Matrix &ans)
 }
 
 //矩阵加法
-void MatrixTools::mAdd(Matrix &x, Matrix &y, Matrix &ans)
+void MatrixTools::mAdd(Matrix x, Matrix y, Matrix &ans)
 {
     assert(x.col == y.col && x.row == y.row);
     this->mResize(x.row, x.col, ans);
@@ -236,7 +236,7 @@ void MatrixTools::mAdd(Matrix &x, Matrix &y, Matrix &ans)
 }
 
 //矩阵累加,x+=y
-void MatrixTools::mAccu(Matrix &x, Matrix &y)
+void MatrixTools::mAccu(Matrix &x, Matrix y)
 {
     Matrix temp;
     this->mAdd(x, y, temp);
@@ -244,7 +244,7 @@ void MatrixTools::mAccu(Matrix &x, Matrix &y)
 }
 
 //矩阵累减,x-=y
-void MatrixTools::mAccuSub(Matrix &x, Matrix &y)
+void MatrixTools::mAccuSub(Matrix &x, Matrix y)
 {
     Matrix temp;
     this->mSub(x, y, temp);
@@ -265,23 +265,8 @@ void MatrixTools::mConstMulOrigin(Matrix x, Matrix &ans, mpz_ptr num)
     }
 }
 
-void MatrixTools::mConstMulF(Matrix x, Matrix &ans, float num)
-{
-    this->mResize(x.row, x.col, ans);
-    for (int i = 0; i < x.row; i++)
-    {
-        for (int j = 0; j < x.col; j++)
-        {
-            int num_int = num * 100;
-            mpz_class zz(num_int), temp;
-            this->mLocalMocheng(zz, x.matrix[i][j], temp); //使用本地模乘
-            mpz_div_ui(ans.matrix[i][j].get_mpz_t(), temp.get_mpz_t(), 100);
-        }
-    }
-}
-
 //矩阵减法
-void MatrixTools::mSub(Matrix &x, Matrix &y, Matrix &ans)
+void MatrixTools::mSub(Matrix x, Matrix y, Matrix &ans)
 {
     assert(x.col == y.col && x.row == y.row);
     this->mResize(x.row, x.col, ans);
@@ -298,7 +283,7 @@ void MatrixTools::mSub(Matrix &x, Matrix &y, Matrix &ans)
 }
 
 //矩阵本地乘法，用于三元组生成
-void MatrixTools::mLocalMul(Matrix &x, Matrix &y, Matrix &ans)
+void MatrixTools::mLocalMul(Matrix x, Matrix y, Matrix &ans)
 {
     assert(x.col == y.row);
     this->mResize(x.row, y.col, ans);
@@ -321,7 +306,7 @@ void MatrixTools::mLocalMul(Matrix &x, Matrix &y, Matrix &ans)
 }
 
 //矩阵三元组LSTM乘法
-void MatrixTools::mLocalMull(Matrix &x, Matrix &y, Matrix &ans)
+void MatrixTools::mLocalMull(Matrix x, Matrix y, Matrix &ans)
 {
     assert(x.col == y.col && x.row == y.row);
     this->mResize(x.row, x.col, ans);
@@ -378,7 +363,7 @@ bool MatrixTools::mCmp(Matrix x, Matrix y)
 }
 
 //模加
-void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
+void MatrixTools::mojia(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
     mpz_inits(a, b, r, NULL);
@@ -390,13 +375,13 @@ void MatrixTools::mojia(mpz_class &x, mpz_class &y, mpz_class &z)
 }
 
 //模累加,x+=y
-void MatrixTools::mAccu(mpz_class &x, mpz_class &y)
+void MatrixTools::mAccu(mpz_class &x, mpz_class y)
 {
     this->mojia(x, y, x);
 }
 
 //模减
-void MatrixTools::mojian(mpz_class &x, mpz_class &y, mpz_class &z)
+void MatrixTools::mojian(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
     mpz_inits(a, b, r, NULL);

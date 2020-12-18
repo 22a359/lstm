@@ -23,6 +23,9 @@ add_executable(lstm
         src/network.h
         src/triples.cpp
         src/triples.h
+        src/share.cpp
+        src/share.h
+        src/triplescheck.h
         )
 
 #add_executable(main

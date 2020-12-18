@@ -1,5 +1,7 @@
 #include "network.h"
+
 using namespace std;
+
 //网络初始化
 void Network::init(eRole role, int port)
 {
@@ -12,7 +14,6 @@ void Network::init(eRole role, int port)
         printf("Socket error : %s\n", strerror(errno));
         exit(1);
     }
-    cout << ". " << flush;
     //填充套接字地址结构，包括地址族，ip和端口号
     bzero(&this->addrSer, sizeof(struct sockaddr_in));
     inet_aton(ipAddr, &(this->addrSer.sin_addr));
@@ -22,43 +23,38 @@ void Network::init(eRole role, int port)
     setsockopt(this->sockSer, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     // 接收缓冲区
     int nRecvBuf = 8 * 1024; //设置为8K
-    setsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (const char *)&nRecvBuf, sizeof(int));
+    setsockopt(this->sockSer, SOL_SOCKET, SO_RCVBUF, (const char *) &nRecvBuf, sizeof(int));
     // 发送缓冲区
     int nSendBuf = 8 * 1024; //设置为8K
-    setsockopt(this->sockSer, SOL_SOCKET, SO_SNDBUF, (const char *)&nSendBuf, sizeof(int));
-    cout << ". " << flush;
+    setsockopt(this->sockSer, SOL_SOCKET, SO_SNDBUF, (const char *) &nSendBuf, sizeof(int));
     if (this->role == SERVER)
     {
         //绑定
-        if (bind(sockSer, (struct sockaddr *)(&this->addrSer), sizeof(struct sockaddr)) == -1)
+        if (bind(sockSer, (struct sockaddr *) (&this->addrSer), sizeof(struct sockaddr)) == -1)
         {
             printf("Bind error : %s\n", strerror(errno));
             exit(1);
         }
-        cout << ". " << flush;
         // 监听
         if (listen(sockSer, 1) == -1)
         {
             printf("Listen error : %s\n", strerror(errno));
             exit(1);
         }
-        cout << ". " << flush;
         //接受
         socklen_t naddr = sizeof(struct sockaddr_in);
-        if ((this->sockCli = accept(this->sockSer, (struct sockaddr *)(&this->addrCli), &naddr)) == -1)
+        if ((this->sockCli = accept(this->sockSer, (struct sockaddr *) (&this->addrCli), &naddr)) == -1)
         {
             printf("Accept error%s\n", strerror(errno));
             exit(1);
         }
-        cout << ". " << flush;
-    }
-    else
+    } else
     {
         //连接
         int times = 1;
-        while (connect(sockSer, (struct sockaddr *)&this->addrSer, sizeof(struct sockaddr)) == -1)
+        while (connect(sockSer, (struct sockaddr *) &this->addrSer, sizeof(struct sockaddr)) == -1)
         {
-            cout << ". " << flush;
+            cout << symbol[times % 4] << "\b" << flush;
             sleep(times++);
             if (times > 11)
             {
@@ -67,10 +63,11 @@ void Network::init(eRole role, int port)
             }
         }
     }
-    cout << "Network OK!" << endl;
+    cout << "\rNetwork OK        " << endl;
     start = time(NULL);
     lastPoint = start;
 }
+
 //发送一个string
 bool Network::mSend(int fd, string send_string)
 {
@@ -102,6 +99,7 @@ bool Network::mSend(int fd, string send_string)
     delete[] c_send_size_str;
     return true;
 }
+
 //接收一个string
 bool Network::mReceive(int fd, string &recv_string)
 {
@@ -139,6 +137,7 @@ bool Network::mReceive(int fd, string &recv_string)
     delete[] cstr;
     return true;
 }
+
 //发送一个string
 bool Network::mSend(string send_string)
 {
@@ -146,6 +145,7 @@ bool Network::mSend(string send_string)
     this->mSend(fd, send_string);
     return true;
 }
+
 //接收一个string
 bool Network::mReceive(string &recv_string)
 {
@@ -153,6 +153,7 @@ bool Network::mReceive(string &recv_string)
     this->mReceive(fd, recv_string);
     return true;
 }
+
 //发送mpz_class数
 bool Network::mSend(mpz_class send)
 {
@@ -162,6 +163,7 @@ bool Network::mSend(mpz_class send)
     this->mSend(fd, send_string);
     return true;
 }
+
 //接收mpz_class数
 bool Network::mReceive(mpz_class &receive)
 {
@@ -171,6 +173,7 @@ bool Network::mReceive(mpz_class &receive)
     this->deserialization(recv_string, receive);
     return true;
 }
+
 //发送矩阵
 bool Network::mSend(Matrix matrix)
 {
@@ -187,6 +190,7 @@ bool Network::mSend(Matrix matrix)
     }
     return true;
 }
+
 //接收矩阵
 bool Network::mReceive(Matrix &matrix)
 {
@@ -199,6 +203,7 @@ bool Network::mReceive(Matrix &matrix)
     this->networkTools.mCopy(matrix_recv, matrix);
     return true;
 }
+
 //发送矩阵数组
 bool Network::mSend(array<Matrix, 5> array)
 {
@@ -208,6 +213,7 @@ bool Network::mSend(array<Matrix, 5> array)
         this->mSend(array[i]); //发送矩阵
     return true;
 }
+
 //接收矩阵数组
 bool Network::mReceive(array<Matrix, 5> &array)
 {
@@ -217,12 +223,14 @@ bool Network::mReceive(array<Matrix, 5> &array)
         this->mReceive(array[i]); //接收矩阵
     return true;
 }
+
 //数序列化
 bool Network::serialization(mpz_class num, string &num_ser)
 {
     num_ser = num.get_str();
     return true;
 }
+
 //矩阵序列化
 bool Network::serialization(Matrix matrix, string &matrix_ser)
 {
@@ -243,12 +251,14 @@ bool Network::serialization(Matrix matrix, string &matrix_ser)
     matrix_ser = matrix_string;
     return true;
 }
+
 //数反序列化
 bool Network::deserialization(string num_ser, mpz_class &num)
 {
     num = mpz_class(num_ser, baseNum);
     return true;
 }
+
 //矩阵反序列化
 bool Network::deserialization(string matrix_ser, Matrix &matrix)
 {
@@ -289,6 +299,7 @@ bool Network::deserialization(string matrix_ser, Matrix &matrix)
     delete[] cstr;
     return true;
 }
+
 //关闭套接字
 Network::~Network()
 {
