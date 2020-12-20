@@ -24,7 +24,7 @@ public:
 
     void tanh(Matrix matrix, Matrix &ans);
 
-    void init(eRole role, int flag);
+    void init(eRole role, int flag, string prefixString);
 
     void getPlain(Matrix cipher, string outputWord);
 

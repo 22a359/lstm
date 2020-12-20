@@ -29,8 +29,12 @@ using namespace std;
 #define M_NORMAL 1
 #define M_CIPHER 2
 #define M_GAUSS true
-//#define RELEASE false
 #define RELEASE true
+#define TRAIN true
+#define TEST false
+//#define RELEASE false
+//#define RENAME true
+#define RENAME false
 extern int baseNum;
 extern mpz_class modNum;
 extern mp_bitcnt_t eAndC;
@@ -40,11 +44,13 @@ extern char tDelim[2];
 extern char mDelim[2];
 extern char iDelim[2];
 extern char checkMSG[3];
+extern string prefix[2];
 extern mpz_class sig0;
 extern mpz_class sig1;
 extern mpz_class sig2;
 extern mpz_class sig3;
 extern mpz_class learningRate;
+extern mpz_class learningRate2;
 extern int m1m1m1_counts;
 extern int m40m58m1_counts;
 extern int m40m40m1_counts;

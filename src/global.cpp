@@ -16,8 +16,10 @@ mpz_class sig0{"2147483648", 10};
 mpz_class sig1{"1071300947", 10};
 mpz_class sig2{"0", 10};
 mpz_class sig3{"-79372572", 10};
-mpz_class learningRate{"1073741824", 10};
+mpz_class learningRate{"1073741824", 10};//0.25
+mpz_class learningRate2{"107374182", 10};//0.025
 char symbol[4] = {'|', '/', '-', '\\'};
+string prefix[2] = {"Training_", "Test_"};
 int m1m1m1_counts = 49626;
 int m40m58m1_counts = 80;
 int m40m40m1_counts = 472;
@@ -32,19 +34,19 @@ int m40m20m1_counts = 1;
 int m40m1m40_counts = 240;
 int m40m1m58_counts = 80;
 
-/*int m1m1m1_counts = 1;
-int m40m58m1_counts = 1;
-int m40m40m1_counts = 1;
-int m20m40m1_counts = 1;
-int m1m20m1_counts = 1;
-int m1m1m20_counts = 1;
-int m20m20m1_counts = 1;
-int m20m1m1_counts = 1;
-int m20m1m40_counts = 1;
-int m40m40m20_counts = 1;
-int m40m20m1_counts = 1;
-int m40m1m40_counts = 1;
-int m40m1m58_counts = 1;*/
+//int m1m1m1_counts = 1000;
+//int m40m58m1_counts = 0;
+//int m40m40m1_counts = 0;
+//int m20m40m1_counts = 0;
+//int m1m20m1_counts = 0;
+//int m1m1m20_counts = 0;
+//int m20m20m1_counts = 0;
+//int m20m1m1_counts = 0;
+//int m20m1m40_counts = 0;
+//int m40m40m20_counts = 0;
+//int m40m20m1_counts = 0;
+//int m40m1m40_counts = 0;
+//int m40m1m58_counts = 0;
 
 int m1m1m1_num = 0;
 int mTriples_num[12] = {0};
@@ -74,18 +76,14 @@ char *stringToChar(string in_string)
 //在大素数范围内生成随机数
 mpz_class randNumGen()
 {
-    mpz_class ans = 0;
-    mpz_t z, r;
-    mpz_inits(z, r, NULL);
     random_device rd;
     default_random_engine e(rd());
+    mpz_class ans, randNum;
     gmp_randstate_t grt;
     gmp_randinit_mt(grt);
     gmp_randseed_ui(grt, e());
-    mpz_urandomb(z, grt, randBit);
-    mpz_mod(r, z, modNum.get_mpz_t());
-    mpz_swap(ans.get_mpz_t(), r);
-    mpz_clears(z, r, NULL);
+    mpz_urandomb(randNum.get_mpz_t(), grt, randBit);
+    mpz_mod(ans.get_mpz_t(), randNum.get_mpz_t(), modNum.get_mpz_t());
     gmp_randclear(grt);
     return ans;
 }
@@ -95,10 +93,8 @@ void showTime()
     time_t point = time(NULL);
     time_t allTime = (double) (point - start);
     time_t thisTime = (double) (point - lastPoint);
-    cout << "Using time: " << thisTime / 86400 << "d " << thisTime / 3600 % 24 << "h " << thisTime / 60 % 60 << "m "
-         << thisTime % 60 << "s | "
-         << "Total time: " << allTime / 86400 << "d " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m "
-         << allTime % 60 << "s" << endl;
+    cout << "Using time: " << thisTime / 3600 % 24 << "h " << thisTime / 60 % 60 << "m " << thisTime % 60 << "s | "
+         << "Total time: " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m " << allTime % 60 << "s" << endl;
     lastPoint = point;
 }
 
@@ -106,8 +102,7 @@ void showTime(int flag)
 {
     time_t point = time(NULL);
     time_t allTime = (double) (point - start);
-    cout << "Total time: " << allTime / 86400 << "d " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m "
-         << allTime % 60 << "s" << endl;
+    cout << "Total time: " << allTime / 3600 % 24 << "h " << allTime / 60 % 60 << "m " << allTime % 60 << "s" << endl;
 }
 
 void mpz_print(mpz_class num, string out_word)

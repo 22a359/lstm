@@ -9,8 +9,8 @@
                 // "${file}",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${workspaceFolder}/bin/${fileBasenameNoExtension}",
-                // "${workspaceFolder}/bin/lstm",
+                // "${workspaceFolder}/bin/${fileBasenameNoExtension}",
+                "${workspaceFolder}/bin/lstm",
                 "-lgmp",
             ],
             "options": {

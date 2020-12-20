@@ -11,7 +11,6 @@ Triples::Triples()
             for (int k = 0; k < 58; k++)
                 this->table[i][j][k] = -1;
     table[40][58][1] = this->m40m58m1;
-    //    table[1][2][1] = this->m40m58m1;
     table[40][40][1] = this->m40m40m1;
     table[20][40][1] = this->m20m40m1;
     table[1][20][1] = this->m1m20m1;
@@ -26,30 +25,30 @@ Triples::Triples()
 }
 
 //读入文件中的三元组
-void Triples::init(eRole role, int flag)
+void Triples::init(eRole role, int flag, string prefixString)
 {
     this->role = role;
     cout << "Triples preparing " << flush;
     cout << symbol[0] << "\b" << flush;
-    this->readIntTriples(flag);
+    this->readIntTriples(flag, prefixString);
     cout << symbol[1] << "\b" << flush;
-    this->readMatrixTriples(40, 58, 1, flag);
+    this->readMatrixTriples(40, 58, 1, flag, prefixString);
     cout << symbol[2] << "\b" << flush;
-    this->readMatrixTriples(40, 40, 1, flag);
+    this->readMatrixTriples(40, 40, 1, flag, prefixString);
     cout << symbol[3] << "\b" << flush;
-    this->readMatrixTriples(20, 40, 1, flag);
-    this->readMatrixTriples(1, 20, 1, flag);
-    this->readMatrixTriples(1, 1, 20, flag);
+    this->readMatrixTriples(20, 40, 1, flag, prefixString);
+    this->readMatrixTriples(1, 20, 1, flag, prefixString);
+    this->readMatrixTriples(1, 1, 20, flag, prefixString);
     cout << symbol[0] << "\b" << flush;
-    this->readMatrixTriples(20, 20, 1, flag);
-    this->readMatrixTriples(20, 1, 1, flag);
-    this->readMatrixTriples(20, 1, 40, flag);
+    this->readMatrixTriples(20, 20, 1, flag, prefixString);
+    this->readMatrixTriples(20, 1, 1, flag, prefixString);
+    this->readMatrixTriples(20, 1, 40, flag, prefixString);
     cout << symbol[1] << "\b" << flush;
-    this->readMatrixTriples(40, 40, 20, flag);
-    this->readMatrixTriples(40, 20, 1, flag);
-    this->readMatrixTriples(40, 1, 40, flag);
+    this->readMatrixTriples(40, 40, 20, flag, prefixString);
+    this->readMatrixTriples(40, 20, 1, flag, prefixString);
+    this->readMatrixTriples(40, 1, 40, flag, prefixString);
     cout << symbol[2] << "\b" << flush;
-    this->readMatrixTriples(40, 1, 58, flag);
+    this->readMatrixTriples(40, 1, 58, flag, prefixString);
     cout << symbol[3] << "\b" << flush;
     cout << "\rTriples OK                  " << endl;
 }
@@ -63,59 +62,95 @@ void Triples::triplesGen(eRole role, int epochsT, int epochsP)
     //生成三元组
     for (int i = 0; i < epochsT; i++)
     {
-        creat(1, 1, 1, m1m1m1_counts, i);
-        creat(40, 58, 1, m40m58m1_counts, i);
-        creat(40, 40, 1, m40m40m1_counts, i);
-        creat(20, 40, 1, m20m40m1_counts, i);
-        creat(1, 20, 1, m1m20m1_counts, i);
-        creat(1, 1, 20, m1m1m20_counts, i);
-        creat(20, 20, 1, m20m20m1_counts, i);
-        creat(20, 1, 1, m20m1m1_counts, i);
-        creat(20, 1, 40, m20m1m40_counts, i);
-        creat(40, 40, 20, m40m40m20_counts, i);
-        creat(40, 20, 1, m40m20m1_counts, i);
-        creat(40, 1, 40, m40m1m40_counts, i);
-        creat(40, 1, 58, m40m1m58_counts, i);
+        creat(1, 1, 1, m1m1m1_counts, i, prefix[0]);
+        creat(40, 58, 1, m40m58m1_counts, i, prefix[0]);
+        creat(40, 40, 1, m40m40m1_counts, i, prefix[0]);
+        creat(20, 40, 1, m20m40m1_counts, i, prefix[0]);
+        creat(1, 20, 1, m1m20m1_counts, i, prefix[0]);
+        creat(1, 1, 20, m1m1m20_counts, i, prefix[0]);
+        creat(20, 20, 1, m20m20m1_counts, i, prefix[0]);
+        creat(20, 1, 1, m20m1m1_counts, i, prefix[0]);
+        creat(20, 1, 40, m20m1m40_counts, i, prefix[0]);
+        creat(40, 40, 20, m40m40m20_counts, i, prefix[0]);
+        creat(40, 20, 1, m40m20m1_counts, i, prefix[0]);
+        creat(40, 1, 40, m40m1m40_counts, i, prefix[0]);
+        creat(40, 1, 58, m40m1m58_counts, i, prefix[0]);
+    }
+    for (int i = 0; i < epochsP; i++)
+    {
+        creat(1, 1, 1, m1m1m1_counts, i, prefix[1]);
+        creat(40, 58, 1, m40m58m1_counts, i, prefix[1]);
+        creat(40, 40, 1, m40m40m1_counts, i, prefix[1]);
+        creat(20, 40, 1, m20m40m1_counts, i, prefix[1]);
+        creat(1, 20, 1, m1m20m1_counts, i, prefix[1]);
+        creat(1, 1, 20, m1m1m20_counts, i, prefix[1]);
+        creat(20, 20, 1, m20m20m1_counts, i, prefix[1]);
+        creat(20, 1, 1, m20m1m1_counts, i, prefix[1]);
+        creat(20, 1, 40, m20m1m40_counts, i, prefix[1]);
+        creat(40, 40, 20, m40m40m20_counts, i, prefix[1]);
+        creat(40, 20, 1, m40m20m1_counts, i, prefix[1]);
+        creat(40, 1, 40, m40m1m40_counts, i, prefix[1]);
+        creat(40, 1, 58, m40m1m58_counts, i, prefix[1]);
     }
 }
 
 //根据尺寸生成不同的三元组
-void Triples::creat(int m, int d, int n, int counts, int flag)
+void Triples::creat(int m, int d, int n, int counts, int flag, string prefixString)
 {
     if (this->network.sockSer == -1)
         this->network.init(this->role, this->port);
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    fileName = "./input/triples/" + prefixString + fileName;
+    if (access("./input/triples/", 0))
+        cout << "dir error" << endl;
     if (m == 1 && d == 1 && n == 1)
     {
-        fileName += ("_int_" + to_string(flag) + ".dat");
+        fileName += ("_int_" + to_string(flag) + ".trp");
         cout << "Generate " << triples_num[0] << " 1×1×1 triples" << endl;
+        ofstream outfile;
+        outfile.open(fileName, ios::out | ios::trunc);
+        if (!outfile)
+        {
+            cout << "Open file failed" << endl;
+            exit(1);
+        }
         for (int i = 0; i < counts; i++)
         {
-            this->createIntTriple(fileName, flag + i);
+            this->createIntTriple(outfile);
             cout << "[" << setiosflags(ios::fixed) << setprecision(2) << (i + 1) * 100.0 / counts << "%] "
                  << symbol[i / 10 % 4] << " \r" << flush;
         }
         cout << endl;
         showTime();
-    } else
+        outfile.close();
+    }
+    else
     {
         fileName += ("_matrix:" + to_string(this->table[m][d][n]) + "_" + to_string(m) + "-" + to_string(d) + "-" +
-                     to_string(n) + "_" + to_string(flag) + ".dat");
+                     to_string(n) + "_" + to_string(flag) + ".trp");
         cout << "Generate " << triples_num[this->table[m][d][n] + 1] << " " << m << "×" << d << "×" << n << " triples"
              << endl;
+        ofstream outfile;
+        outfile.open(fileName, ios::out | ios::trunc);
+        if (!outfile)
+        {
+            cout << "Open file failed" << endl;
+            exit(1);
+        }
         for (int i = 0; i < counts; i++)
         {
-            this->createMatrixTriple(fileName, m, d, n, flag + i);
+            this->createMatrixTriple(outfile, m, d, n);
             cout << "[" << setiosflags(ios::fixed) << setprecision(2) << (i + 1) * 100.0 / counts << "%] "
                  << symbol[i % 4] << " \r" << flush;
         }
         cout << endl;
         showTime();
+        outfile.close();
     }
 }
 
 //生成普通三元组，并写入文件
-void Triples::createIntTriple(string fileName, int flag)
+void Triples::createIntTriple(ofstream &outfile)
 {
     mpz_class a, b, c, aTimesB;
     string index, ck_string = checkMSG, recv_string;
@@ -143,7 +178,8 @@ void Triples::createIntTriple(string fileName, int flag)
         this->network.mReceive(recv_string);
         this->network.mSend(v);
         this->network.mReceive(index);
-    } else
+    }
+    else
     { //CLIENT计算R和W发送给对方，并接收对方生成的u和v，计算出c
         Matrix Z, W;
         mpz_class r = randNumGen();
@@ -169,21 +205,15 @@ void Triples::createIntTriple(string fileName, int flag)
     }
     //将三元组保存到文件中
     string out_string, out_a, out_b, out_c;
-    ofstream outfile;
-    if (flag)
-        outfile.open(fileName, ios::app);
-    else
-        outfile.open(fileName, ios::out | ios::trunc);
     network.serialization(a, out_a);
     network.serialization(b, out_b);
     network.serialization(c, out_c);
     out_string = index + ":" + out_a + "-" + out_b + "-" + out_c;
     outfile << out_string << endl;
-    outfile.close();
 }
 
 //生成矩阵三元组，并写入文件
-void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
+void Triples::createMatrixTriple(ofstream &outfile, int m, int d, int n)
 {
     string index, ck_string = checkMSG, recv_string;
     mpz_class r_inv;
@@ -227,7 +257,8 @@ void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
         this->network.mReceive(recv_string);
         this->network.mSend(V);
         this->network.mReceive(index);
-    } else
+    }
+    else
     {
         array<Matrix, 5> Y = {I, B, A, aTimesB, I_minus};
         Matrix R1{1, 1}, R2{d, n}, R3{m, d}, R4{m, n}, R5{1, 1};
@@ -257,38 +288,28 @@ void Triples::createMatrixTriple(string fileName, int m, int d, int n, int flag)
         index = this->randIndex();
         this->network.mSend(index);
     }
-    if (!(this->table[m][d][n] >= 0 && this->table[m][d][n] <= 11))
-    {
-        cout << "CreateMatrixTriple Error" << endl;
-        // exit(1);
-    }
     //将三元组保存到文件中
     string out_string, out_a, out_b, out_c;
-    ofstream outfile;
-    if (flag)
-        outfile.open(fileName, ios::app);
-    else
-        outfile.open(fileName, ios::out | ios::trunc);
     network.serialization(A, out_a);
     network.serialization(B, out_b);
     network.serialization(C, out_c);
     out_string = index + ":" + out_a + "-" + out_b + "-" + out_c;
     outfile << out_string << endl;
-    outfile.close();
 }
 
 //读入文件里的普通三元组
-void Triples::readIntTriples(int flag)
+void Triples::readIntTriples(int flag, string prefixString)
 {
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
-    fileName += ("_int_" + to_string(flag) + ".dat");
+    fileName = "./input/triples/" + prefixString + fileName;
+    fileName += ("_int_" + to_string(flag) + ".trp");
     string fileNameNew = "USED_" + fileName;
     ifstream infile;
     infile.open(fileName, ios::in);
     if (!infile)
     { //三元组文件不存在，则生成
         cout << "\n1×1×1 triples not found" << endl;
-        this->creat(1, 1, 1, triples_num[0], 0);
+        this->creat(1, 1, 1, triples_num[0], flag, prefixString);
         infile.open(fileName, ios::in);
     }
     string line;
@@ -301,18 +322,19 @@ void Triples::readIntTriples(int flag)
     }
     infile.close();
     //已读取的文件进行改名
-    //if (RELEASE)
-    //    if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
-    //        cout << "Rename error" << endl;
+    if (RENAME)
+        if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
+            cout << "Rename error" << endl;
 }
 
 //读入文件里的矩阵三元组
-void Triples::readMatrixTriples(int m, int d, int n, int flag)
+void Triples::readMatrixTriples(int m, int d, int n, int flag, string prefixString)
 {
     int indexFlag = this->table[m][d][n];
     string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    fileName = "./input/triples/" + prefixString + fileName;
     fileName += ("_matrix:" + to_string(indexFlag) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) +
-                 "_" + to_string(flag) + ".dat");
+                 "_" + to_string(flag) + ".trp");
     string fileNameNew = "USED_" + fileName;
     ifstream infile;
     infile.open(fileName, ios::in);
@@ -320,7 +342,7 @@ void Triples::readMatrixTriples(int m, int d, int n, int flag)
     { //三元组文件不存在，则生成
         cout << "\n"
              << m << "×" << d << "×" << n << " triples not found" << endl;
-        this->creat(m, d, n, triples_num[indexFlag + 1], 0);
+        this->creat(m, d, n, triples_num[indexFlag + 1], flag, prefixString);
         infile.open(fileName, ios::in);
     }
     string line;
@@ -334,9 +356,9 @@ void Triples::readMatrixTriples(int m, int d, int n, int flag)
     }
     infile.close();
     //已读取的文件进行改名
-    //if (RELEASE)
-    //    if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
-    //        cout << "Rename error" << endl;
+    if (RENAME)
+        if (rename(fileName.c_str(), fileNameNew.c_str()) == -1)
+            cout << "Rename error" << endl;
 }
 
 //三元组反序列化
@@ -413,8 +435,7 @@ MatrixTriples Triples::getTriples(int m, int d, int n)
               triples.b.row == d &&
               triples.b.col == n &&
               triples.c.row == m &&
-              triples.c.col == n)
-                )
+              triples.c.col == n))
         {
             cout << "ERROR: Get " << m << "×" << d << "×" << n << " matrix triples failed!" << endl;
             exit(1);

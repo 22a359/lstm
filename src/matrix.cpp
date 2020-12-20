@@ -15,14 +15,7 @@ Matrix::Matrix(int row, int col)
     {
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
-        {
-            mpz_t r;
-            mpz_init(r);
-            mpz_class randNum = randNumGen();
-            mpz_mod(r, randNum.get_mpz_t(), modNum.get_mpz_t());
-            this->matrix[i][j] = mpz_class(r);
-            mpz_clear(r);
-        }
+            this->matrix[i][j] = randNumGen();
     }
 }
 

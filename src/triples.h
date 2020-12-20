@@ -41,22 +41,22 @@ public:
 
     Triples();
 
-    void init(eRole role, int flag);
+    void init(eRole role, int flag, string prefixString);
 
 private:
     Network network;
     MatrixTools tripleTools;
     int port = 40343;
 
-    void creat(int m, int d, int n, int counts, int flag);
+    void creat(int m, int d, int n, int counts, int flag, string prefixString);
 
-    void createIntTriple(string fileName, int flag);
+    void createIntTriple(ofstream &outfile);
 
-    void createMatrixTriple(string fileName, int m, int d, int n, int flag);
+    void createMatrixTriple(ofstream &outfile, int m, int d, int n);
 
-    void readIntTriples(int flag);
+    void readIntTriples(int flag, string prefixString);
 
-    void readMatrixTriples(int m, int d, int n, int flag);
+    void readMatrixTriples(int m, int d, int n, int flag, string prefixString);
 
     string randIndex();                         //生成随机序列号
     array<array<array<int, 58>, 58>, 58> table; //查找表

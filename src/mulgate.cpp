@@ -3,7 +3,7 @@
 using namespace std;
 
 //初始化
-void TriplesMul::init(eRole role, int flag)
+void TriplesMul::init(eRole role, int flag, string prefixString)
 {
     if (!flag)
     {
@@ -11,7 +11,7 @@ void TriplesMul::init(eRole role, int flag)
         if (this->network.sockSer == -1)
             this->network.init(this->role, port);
     }
-    MulTriples.init(role, flag);
+    MulTriples.init(role, flag, prefixString);
 }
 
 //矩阵三元组乘法
