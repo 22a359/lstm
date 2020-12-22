@@ -1,25 +1,29 @@
 #include "lstm.h"
+
 void printHelp();
+
 int main(int argc, char *argv[])
 {
-    char action = 'x', role = 'x';
-    int epochsT = 1, epochsP = 1, peopleNum = 1, ch;
-    bool Role;
+    char action = 'x', cRole = 'x';
+    int epochsT = 1, epochsP = 1, ch;
     if (argc == 1)
     {
         cout << "Use \"lstm -h\" to get help.\n" << endl;
         do
         {
-            cout << "\nInput your role:\n(1)SERVER  (2)CLIENT\nrole:" << flush;
-            cin.get(role).get();
-        } while (role != '1' && role != '2');
+            cout << "\nInput your cRole:\n(1)SERVER  (2)CLIENT\ncRole:" << flush;
+            cin.get(cRole).get();
+        } while (cRole != '1' && cRole != '2');
         do
         {
             cout << "\nInput your action:\n(1)Triples Gen   (2)Triples Check   (3)Share Gen   (4)LSTM\naction:"
                  << flush;
             cin.get(action).get();
         } while (action != '1' && action != '2' && action != '3' && action != '4');
-        Role = (role == '1') ? SERVER : CLIENT;
+        cout << "Input peopleNum:" << flush;
+        cin >> peopleNum;
+        role = (cRole == '1') ? SERVER : CLIENT;
+
     } else
     {
         while ((ch = getopt(argc, argv, "r:a:p:h")) != -1)
@@ -27,7 +31,7 @@ int main(int argc, char *argv[])
             switch (ch)
             {
                 case 'r':
-                    Role = (!strcmp(optarg, "1")) ? SERVER : CLIENT;
+                    role = (!strcmp(optarg, "1")) ? SERVER : CLIENT;
                     break;
                 case 'a':
                     action = optarg[0];
@@ -45,9 +49,9 @@ int main(int argc, char *argv[])
             }
         }
     }
-    cout << "\nYou are " << ((Role == SERVER) ? "SERVER" : "CLIENT") << endl;
+    cout << "\nYou are " << ((role == SERVER) ? "SERVER" : "CLIENT") << endl;
 
-    Lstm lstm(Role, peopleNum);
+    Lstm lstm;
 
     switch (action)
     {
@@ -59,7 +63,7 @@ int main(int argc, char *argv[])
             cout << "\nInput predict rounds:" << flush;
             cin >> epochsP;
             cin.get();
-            lstm.triplesGen(epochsT,epochsP);
+            lstm.triplesGen(epochsT, epochsP);
             break;
         case '2':
             cout << "Triples Check" << endl;
@@ -79,7 +83,9 @@ int main(int argc, char *argv[])
     showTime(1);
     return 0;
 }
-void printHelp(){
+
+void printHelp()
+{
     cout << "\n Usage :"
          << "\tlstm [Options] <Destination>\n\n"
          << " Options      Destination\n"

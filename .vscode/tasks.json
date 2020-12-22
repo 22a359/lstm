@@ -12,6 +12,7 @@
                 // "${workspaceFolder}/bin/${fileBasenameNoExtension}",
                 "${workspaceFolder}/bin/lstm",
                 "-lgmp",
+                "-lpthread",
             ],
             "options": {
                 "cwd": "/usr/bin"

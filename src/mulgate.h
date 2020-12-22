@@ -10,8 +10,6 @@ using namespace std;
 class TriplesMul
 {
 public:
-    eRole role;
-
     void mMul(Matrix x, Matrix y, Matrix &ans);  //矩阵乘法
 
     void mMull(Matrix x, Matrix y, Matrix &ans); //矩阵并列乘法
@@ -24,7 +22,7 @@ public:
 
     void tanh(Matrix matrix, Matrix &ans);
 
-    void init(eRole role, int flag, string prefixString);
+    void init(int flag, string prefixString);
 
     void getPlain(Matrix cipher, string outputWord);
 

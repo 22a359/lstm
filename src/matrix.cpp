@@ -19,20 +19,21 @@ Matrix::Matrix(int row, int col)
     }
 }
 
-//生成符合正态分布的矩阵
+//生成特殊分布的矩阵
 Matrix::Matrix(bool flag, int row, int col)
 {
     this->row = row;
     this->col = col;
+    random_device rd;
+    default_random_engine rng{rd()};
+    uniform_real_distribution<double> distribution(-0.1, 0.1);//均匀分布
+    //normal_distribution<double> distribution(-0.1, 0.1);//高斯分布
     this->matrix.resize(this->row);
     for (int i = 0; i < this->row; i++)
     {
         this->matrix[i].resize(this->col);
         for (int j = 0; j < this->col; j++)
         {
-            random_device rd;
-            default_random_engine rng{rd()};
-            uniform_real_distribution<double> distribution(-0.1, 0.1);
             double randNum;
             while ((randNum = distribution(rng)) > 1.0 || randNum < -1.0);
             mpf_class num = randNum;
@@ -359,12 +360,12 @@ bool MatrixTools::mCmp(Matrix x, Matrix y)
 void MatrixTools::mojia(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a, b, r, NULL);
+    mpz_inits(a, b, r, nullptr);
     mpz_add(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
-    mpz_clears(a, b, r, NULL);
+    mpz_clears(a, b, r, nullptr);
 }
 
 //模累加,x+=y
@@ -377,22 +378,22 @@ void MatrixTools::mAccu(mpz_class &x, mpz_class y)
 void MatrixTools::mojian(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a, b, r, NULL);
+    mpz_inits(a, b, r, nullptr);
     mpz_sub(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
-    mpz_clears(a, b, r, NULL);
+    mpz_clears(a, b, r, nullptr);
 }
 
 //本地模乘
 void MatrixTools::mLocalMocheng(mpz_class x, mpz_class y, mpz_class &z)
 {
     mpz_t a, b, r;
-    mpz_inits(a, b, r, NULL);
+    mpz_inits(a, b, r, nullptr);
     mpz_mul(a, x.get_mpz_t(), y.get_mpz_t());
     mpz_add(b, a, modNum.get_mpz_t());
     mpz_mod(r, b, modNum.get_mpz_t());
     z = mpz_class(r);
-    mpz_clears(a, b, r, NULL);
+    mpz_clears(a, b, r, nullptr);
 }

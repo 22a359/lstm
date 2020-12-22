@@ -39,7 +39,7 @@ int check()
     }
     cout << "Another file name:          " << cName << endl;
     type = (sName[7] == 'i') ? '1' : '2';
-    start = time(NULL);
+    start = time(nullptr);
     if (type == '1')
     {
         mpz_class a0, b0, c0, a1, b1, c1;

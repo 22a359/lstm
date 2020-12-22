@@ -25,7 +25,6 @@ typedef struct
 class Triples
 {
 public:
-    eRole role;
     array<stack<MatrixTriples>, 13> matrixTriples;
     stack<IntTriples> intTriples;
 
@@ -33,7 +32,7 @@ public:
 
     MatrixTriples getTriples(int m, int d, int n);
 
-    void triplesGen(eRole role, int epochsT, int epochsP);
+    void triplesGen(int epochsT, int epochsP);
 
     bool deserialization(string in_string, mpz_class &index, mpz_class &a, mpz_class &b, mpz_class &c);
 
@@ -41,7 +40,7 @@ public:
 
     Triples();
 
-    void init(eRole role, int flag, string prefixString);
+    void init(int flag, string prefixString);
 
 private:
     Network network;

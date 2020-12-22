@@ -122,7 +122,6 @@ public:
 class Lstm
 {
 public:
-    eRole role;
     Lstm_layer1 layer1;
     Lstm_layer2 layer2;
     Lstm_layer3 layer3;
@@ -130,7 +129,7 @@ public:
     Matrix output{M_NORMAL, 0, 1, 1};
     Matrix output_train{M_NORMAL, 0, 1, 1};
 
-    Lstm(eRole role, int peopleNum);
+    Lstm();
 
     void train();
 
@@ -142,20 +141,14 @@ public:
 
 private:
     mpf_class actualValue, predictiveValue, deltaValue;
-    int peopleNum = 1;
-    int steps = 20;
+    int steps = 2;
     vector<array<string, 58>> data;
-    vector<array<int, 8>> distribution;
+    vector<array<int, 3>> distribution;
     enum dataDistribution
     {
-        dataStart,
-        dataEnd,
         trainingStart,
         trainingEnd,
-        trainingRounds,
-        testStart,
-        testEnd,
-        testRounds
+        testEnd
     };
 
     void dataReadIn();
@@ -169,10 +162,8 @@ private:
     void errorDisplay();
 };
 
-Lstm::Lstm(eRole role, int peopleNum)
+Lstm::Lstm()
 {
-    this->role = role;
-    this->peopleNum = peopleNum;
     this->dataReadIn();
 }
 
@@ -181,7 +172,7 @@ void Lstm::triplesGen(int epochsT, int epochsP)
 {
     Triples triples;
     cout << "\nTriples generat start!" << endl;
-    triples.triplesGen(this->role, epochsT, epochsP);
+    triples.triplesGen(epochsT, epochsP);
     cout << "\nTriples generat done!" << endl;
 }
 
@@ -196,10 +187,10 @@ void Lstm::dataReadIn()
     string line;
     while (getline(infile, line) && infile.good() && !infile.eof() && !(line.empty()))
     { //获取数据分布情况
-        array<int, 8> arrayTemp{0};
+        array<int, 3> arrayTemp{0};
         istringstream readstr(line);
         string partOfstr;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 3; i++)
         {
             getline(readstr, partOfstr, ',');
             arrayTemp[i] = stoi(partOfstr);
@@ -208,12 +199,12 @@ void Lstm::dataReadIn()
     }
     infile.close();
     //读取数据
-    fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    fileName = (role == SERVER) ? "SERVER" : "CLIENT";
     fileName = "input/data/" + fileName + ".dat";
     infile.open(fileName, ios::in);
     char *pch;
-    int index = 0, endIndex = this->distribution[this->peopleNum - 1][dataEnd];
-    while (index++ < endIndex)
+    int index = 0, endIndex = this->distribution[peopleNum - 1][testEnd];
+    while (index++ <= endIndex)
     {
         getline(infile, line);
         char *cstr = stringToChar(line);
@@ -221,7 +212,7 @@ void Lstm::dataReadIn()
         for (int j = 0; j < 58; j++)
         {
             if (j)
-                pch = strtok(NULL, mDelim);
+                pch = strtok(nullptr, mDelim);
             else
                 pch = strtok(cstr, mDelim);
             dataTemp[j] = pch;
@@ -239,10 +230,11 @@ void Lstm::dataFill(int people, int index, bool flag)
 {
     int indexStart;
     if (flag == TRAIN)
-        indexStart = this->distribution[people][trainingStart] + index * this->steps - 1;
+        indexStart = this->distribution[people][trainingStart] + index * this->steps;
     else
-        indexStart = this->distribution[people][testStart] + index * this->steps - 1;
+        indexStart = this->distribution[people][trainingEnd] + 1 + index * this->steps;
     int indexMax = this->data.size();
+    //cout << "indexStart: " << indexStart << endl;
     if (indexStart + 20 > indexMax - 1)
     {
         cout << "Data fill failed!" << endl;
@@ -254,29 +246,33 @@ void Lstm::dataFill(int people, int index, bool flag)
         {
             mpz_class temp{this->data[indexStart][j]};
             this->layer1.X[i].change(j, 0, temp);
+            //if (!j)
+            //triplesMul.getPlain(temp, "data" + to_string(i));
         }
         indexStart++;
     }
     mpz_class temp{this->data[indexStart][0]};
     this->output_train.change(0, 0, temp);
+    //triplesMul.getPlain(temp, "ans");
 }
 
 //训练
 void Lstm::train()
 {
-    for (int p = 0; p < this->peopleNum; p++)
+    //this->test(); //一个人训练完就进行测试
+    for (int p = 0; p < peopleNum; p++)
     {
-        string roleStr = (this->role == SERVER) ? "SERVER" : "CLIENT";
+        string roleStr = (role == SERVER) ? "SERVER" : "CLIENT";
         string fileName = "./output/train_" + roleStr + "_" + to_string(p + 1) + ".dat";
-        //string out_string;
-        //ofstream outfile;
-        //outfile.open(fileName, ios::out | ios::trunc);
         FILE *fp = fopen(fileName.c_str(), "w");
-        for (int i = 0; i < this->distribution[p][trainingRounds]; i++)
+        int rounds = this->distribution[p][trainingEnd] - this->distribution[p][trainingStart] + 1;
+        rounds = (rounds - 21) / this->steps + 1;
+        cout << "Training rounds: " << rounds << endl;
+        for (int i = 0; i < rounds; i++)
         {
             cout << "\nTraining round " << i + 1 << " Begin" << endl;
-            this->dataFill(p, i, TRAIN);
             this->tripesInit(0, prefix[0]);
+            this->dataFill(p, i, TRAIN);
             this->forwardNetwork();
             this->errorDisplay();
             gmp_fprintf(fp, "%.8Ff,%.8Ff,%.8Ff\n",
@@ -284,17 +280,12 @@ void Lstm::train()
                         this->actualValue.get_mpf_t(),
                         this->deltaValue.get_mpf_t());
             fflush(fp);
-            //out_string = to_string(this->predictiveValue.get_d()) + "," +
-            //             to_string(this->actualValue.get_d()) + "," +
-            //             to_string(this->deltaValue.get_d());
-            //outfile << out_string << endl;
             if (i == 200)
                 learningRate = learningRate2;
             this->backwardNetwork();
             cout << "Training round " << i + 1 << " OK" << endl;
         }
         fclose(fp);
-        //outfile.close();
     }
     this->test(); //一个人训练完就进行测试
 }
@@ -302,19 +293,19 @@ void Lstm::train()
 //测试
 void Lstm::test()
 {
-    for (int p = 0; p < this->peopleNum; p++)
+    for (int p = 0; p < peopleNum; p++)
     {
-        string roleStr = (this->role == SERVER) ? "SERVER" : "CLIENT";
+        string roleStr = (role == SERVER) ? "SERVER" : "CLIENT";
         string fileName = "./output/test_" + roleStr + "_" + to_string(p + 1) + ".dat";
-        //string out_string;
-        //ofstream outfile;
-        //outfile.open(fileName, ios::out | ios::trunc);
         FILE *fp = fopen(fileName.c_str(), "w");
-        for (int i = 0; i < this->distribution[p][testRounds]; i++)
+        int rounds = this->distribution[p][testEnd] - this->distribution[p][trainingEnd];
+        rounds = (rounds - 21) / this->steps + 1;
+        cout << "Test rounds: " << rounds << endl;
+        for (int i = 0; i < rounds; i++)
         {
             cout << "\nTest round " << i + 1 << " Begin" << endl;
-            this->dataFill(p, i, TEST);
             this->tripesInit(0, prefix[1]);
+            this->dataFill(p, i, TEST);
             this->forwardNetwork();
             this->errorDisplay();
             gmp_fprintf(fp, "%.8Ff,%.8Ff,%.8Ff\n",
@@ -322,13 +313,8 @@ void Lstm::test()
                         this->actualValue.get_mpf_t(),
                         this->deltaValue.get_mpf_t());
             fflush(fp);
-            //out_string = to_string(this->predictiveValue.get_d()) + "," +
-            //             to_string(this->actualValue.get_d()) + "," +
-            //             to_string(this->deltaValue.get_d());
-            //outfile << out_string << endl;
             cout << "Test round " << i + 1 << " OK" << endl;
         }
-        //outfile.close();
         fclose(fp);
     }
     cout << "Test finish" << endl;
@@ -337,7 +323,7 @@ void Lstm::test()
 //读入三元组
 void Lstm::tripesInit(int flag, string prefixString)
 {
-    triplesMul.init(this->role, flag, prefixString);
+    triplesMul.init(flag, prefixString);
 }
 
 void Lstm::errorDisplay()
@@ -353,13 +339,9 @@ void Lstm::forwardNetwork()
 {
     cout << "forward begin " << flush;
     this->layer1.forward();
-    //cout << ". " << flush;
     this->layer2.forward(layer1);
-    //cout << ". " << flush;
     this->layer3.forward(layer2);
-    //cout << ". " << flush;
     this->layer4.forward(layer3);
-    //cout << "." << flush;
     lstmTools.mCopy(this->layer4.A4, this->output);
     cout << "\rforward finish " << endl;
     showTime();
@@ -370,13 +352,9 @@ void Lstm::backwardNetwork()
 {
     cout << "backward begin " << flush;
     lstmTools.mCopy(this->output_train, this->layer4.et);
-    //cout << ". " << flush;
     this->layer4.backward(layer3);
-    //cout << ". " << flush;
     this->layer3.backward(layer4, layer2);
-    //cout << ". " << flush;
     this->layer2.backward(layer3, layer1);
-    //cout << ". " << flush;
     this->layer1.backward(layer2);
     cout << "\rbackward finish " << endl;
     showTime();

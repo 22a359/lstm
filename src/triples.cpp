@@ -25,9 +25,8 @@ Triples::Triples()
 }
 
 //读入文件中的三元组
-void Triples::init(eRole role, int flag, string prefixString)
+void Triples::init(int flag, string prefixString)
 {
-    this->role = role;
     cout << "Triples preparing " << flush;
     cout << symbol[0] << "\b" << flush;
     this->readIntTriples(flag, prefixString);
@@ -54,11 +53,10 @@ void Triples::init(eRole role, int flag, string prefixString)
 }
 
 //生成三元组
-void Triples::triplesGen(eRole role, int epochsT, int epochsP)
+void Triples::triplesGen(int epochsT, int epochsP)
 {
-    this->role = role;
     if (this->network.sockSer == -1)
-        this->network.init(role, this->port);
+        this->network.init(this->port);
     //生成三元组
     for (int i = 0; i < epochsT; i++)
     {
@@ -98,8 +96,8 @@ void Triples::triplesGen(eRole role, int epochsT, int epochsP)
 void Triples::creat(int m, int d, int n, int counts, int flag, string prefixString)
 {
     if (this->network.sockSer == -1)
-        this->network.init(this->role, this->port);
-    string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+        this->network.init(this->port);
+    string fileName = (role == SERVER) ? "SERVER" : "CLIENT";
     fileName = "./input/triples/" + prefixString + fileName;
     if (access("./input/triples/", 0))
         cout << "dir error" << endl;
@@ -157,7 +155,7 @@ void Triples::createIntTriple(ofstream &outfile)
     a = randNumGen();
     b = randNumGen();
     c = randNumGen();
-    if (this->role == SERVER)
+    if (role == SERVER)
     { //SERVER接收对方的R和W，计算u和v发送给对方
         Matrix R, W;
         mpz_class u = 0, v = 0, temp_u, temp_v;
@@ -220,7 +218,7 @@ void Triples::createMatrixTriple(ofstream &outfile, int m, int d, int n)
     Matrix A{m, d}, B{d, n}, C{m, n}, aTimesB;
     Matrix I{M_NORMAL, 1, 1, 1}, I_minus{M_NORMAL, -1, 1, 1};
     this->tripleTools.mLocalMul(A, B, aTimesB);
-    if (this->role == SERVER)
+    if (role == SERVER)
     {
         Matrix R1, R2, R3, R4, R5;
         Matrix W1, W2, W3, W4, W5;
@@ -300,7 +298,7 @@ void Triples::createMatrixTriple(ofstream &outfile, int m, int d, int n)
 //读入文件里的普通三元组
 void Triples::readIntTriples(int flag, string prefixString)
 {
-    string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    string fileName = (role == SERVER) ? "SERVER" : "CLIENT";
     fileName = "./input/triples/" + prefixString + fileName;
     fileName += ("_int_" + to_string(flag) + ".trp");
     string fileNameNew = "USED_" + fileName;
@@ -331,7 +329,7 @@ void Triples::readIntTriples(int flag, string prefixString)
 void Triples::readMatrixTriples(int m, int d, int n, int flag, string prefixString)
 {
     int indexFlag = this->table[m][d][n];
-    string fileName = (this->role == SERVER) ? "SERVER" : "CLIENT";
+    string fileName = (role == SERVER) ? "SERVER" : "CLIENT";
     fileName = "./input/triples/" + prefixString + fileName;
     fileName += ("_matrix:" + to_string(indexFlag) + "_" + to_string(m) + "-" + to_string(d) + "-" + to_string(n) +
                  "_" + to_string(flag) + ".trp");
@@ -368,12 +366,12 @@ bool Triples::deserialization(string in_string, mpz_class &index, mpz_class &a, 
     char *cstr = stringToChar(in_string);
     pch = strtok(cstr, iDelim);
     index = mpz_class(pch, baseNum); //分离出序号
-    pch = strtok(NULL, iDelim);      //剩下的三元组
+    pch = strtok(nullptr, iDelim);      //剩下的三元组
     pch = strtok(pch, tDelim);
     a = mpz_class(pch, baseNum); //分离出a
-    pch = strtok(NULL, tDelim);
+    pch = strtok(nullptr, tDelim);
     b = mpz_class(pch, baseNum); //分离出b
-    pch = strtok(NULL, tDelim);
+    pch = strtok(nullptr, tDelim);
     c = mpz_class(pch, baseNum); //分离出c
     delete[] cstr;
     return true;
@@ -385,12 +383,12 @@ bool Triples::deserialization(string in_string, mpz_class &index, Matrix &a, Mat
     char *cstr = stringToChar(in_string);
     pch1 = strtok(cstr, iDelim);
     index = mpz_class(pch1, baseNum); //分离出序号
-    pch1 = strtok(NULL, iDelim);      //剩下的三元组
+    pch1 = strtok(nullptr, iDelim);      //剩下的三元组
     pch2 = strtok(pch1, tDelim);
     string a_string = pch2; //分离出a
-    pch2 = strtok(NULL, tDelim);
+    pch2 = strtok(nullptr, tDelim);
     string b_string = pch2; //分离出b
-    pch2 = strtok(NULL, tDelim);
+    pch2 = strtok(nullptr, tDelim);
     string c_string = pch2; //分离出c
     network.deserialization(a_string, a);
     network.deserialization(b_string, b);
@@ -448,7 +446,7 @@ MatrixTriples Triples::getTriples(int m, int d, int n)
 //生成随机序列号
 string Triples::randIndex()
 {
-    time_t times = time(NULL);
+    time_t times = time(nullptr);
     clock_t clocks = clock();
     int randBit = rand() % 10;
     string index = to_string(times) + to_string(clocks) + to_string(randBit);

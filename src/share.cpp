@@ -2,7 +2,7 @@
 
 void shareGen()
 {
-    start = time(NULL);
+    start = time(nullptr);
     ifstream _csvInput;
     //指定文件路径
     string p = "input/data/dataSet.csv";
